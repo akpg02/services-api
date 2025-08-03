@@ -1,0 +1,119 @@
+const express = require('express');
+const Redis = require('ioredis');
+const helmet = require('helmet');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const healthRoutes = require('./routes/health/health.router');
+const docsRoutes = require('./routes/docs/docs.router');
+const routes = require('./routes/index.router');
+const { sanitize } = mongoSanitize;
+const { xss } = require('express-xss-sanitizer');
+const { RedisStore } = require('rate-limit-redis');
+const { RateLimiterRedis } = require('rate-limiter-flexible');
+const { rateLimit } = require('express-rate-limit');
+const {
+  errorHandler,
+  logger,
+  corsOptions,
+  credentials,
+} = require('@gaeservices/common');
+
+const app = express();
+
+const redisClient = new Redis(process.env.REDIS_URL);
+
+// Security headers
+app.use(helmet());
+
+// Credentials & CORS
+app.use(credentials);
+app.use(cors(corsOptions));
+
+// Parsing and sanitization
+
+app.use(cookieParser());
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+// Request logging
+app.use((req, _res, next) => {
+  logger.info(`Receive ${req.method} request to ${req.url}`);
+  logger.info(`Request body ${req.body}`);
+  next();
+});
+
+app.use(xss());
+
+// DDos protection and rate limiting
+const rateLimiter = new RateLimiterRedis({
+  storeClient: redisClient,
+  keyPrefix: 'middleware',
+  points: 10,
+  duration: 1,
+});
+
+app.use((req, res, next) => {
+  rateLimiter
+    .consume(req.ip)
+    .then(() => next())
+    .catch(() => {
+      logger.warn(`Rate limit exceeded for IP: ${req.ip}`);
+      res.status(429).json({
+        success: false,
+        message: 'Too many requests.',
+      });
+    });
+});
+
+// Data sanitization against NoSQL query injection
+app.use((req, res, next) => {
+  // 1) sanitize body & params by replacing the entire object
+  if (req.body) req.body = sanitize(req.body);
+  if (req.params) req.params = sanitize(req.params);
+
+  // 2) sanitize query _in place_ (so we never reassign req.query)
+  for (const key of Object.keys(req.query || {})) {
+    req.query[key] = sanitize(req.query[key]);
+  }
+  next();
+});
+
+// IP based rate limiting for sensitive endpoints
+const sensitiveEnpointRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    logger.warn(`Sensitive endpoint rate limit exceeded for IP: ${req.ip}`);
+    res.status(429).json({ success: false, message: 'Too many requests' });
+  },
+  store: new RedisStore({
+    sendCommand: (...args) => redisClient.call(...args),
+  }),
+});
+
+// apply this sensitive enpoints limiter
+app.use('/api/auth/register', sensitiveEnpointRateLimit);
+
+// Health endpoint at GET /
+app.use('/', healthRoutes);
+
+// Swagger / ReDoc at GET /docs/*
+app.use('/docs', docsRoutes);
+
+// Routes
+app.use(
+  '/api/',
+  (req, _res, next) => {
+    req.redisClient = redisClient;
+    next();
+  },
+  routes
+);
+
+// error handler
+app.use(errorHandler);
+
+module.exports = app;

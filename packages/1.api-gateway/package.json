@@ -1,0 +1,47 @@
+{
+  "name": "@gaeservices/api-gateway",
+  "version": "1.0.0",
+  "description": "API Gateway Microservice",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "NODE_ENV=test jest --runInBand --detectOpenHandles --watchAll",
+    "watch": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "cluster": "pm2 start src/server.js -i max",
+    "bundle": "swagger-cli bundle src/docs/openapi/index.bundle.yaml --outfile src/docs/openapi/bundled.yaml --type yaml",
+    "lint": "redocly lint src/docs/openapi/bundled.yaml",
+    "build:redoc": "redocly build-docs src/docs/openapi/bundled.yaml -o src/docs/redoc/index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@gaeservices/common": "^1.0.9",
+    "amqplib": "^0.10.8",
+    "axios": "^1.11.0",
+    "chalk": "^4.1.2",
+    "concurrently": "^9.2.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-http-proxy": "^2.1.1",
+    "express-rate-limit": "^8.0.1",
+    "express-xss-sanitizer": "^2.0.0",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.7.0",
+    "jest": "^30.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "pm2": "^6.0.8",
+    "rate-limit-redis": "^4.2.1",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.17.0",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4",
+    "swagger-combine": "^1.4.0"
+  }
+}
