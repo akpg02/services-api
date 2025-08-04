@@ -1,0 +1,31 @@
+LoginSuccess:
+  description: Successful login
+  content:
+    application/json:
+      schema:
+        $ref: './login.schema.yaml#/LoginResponse'
+
+Unauthorized:
+  description: Invalid credentials
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          message:
+            type: string
+            example: Invalid credentials
+
+ServerErrorLogin:
+  description: Server error
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: false
+          message:
+            type: string
+            example: 'Server error'

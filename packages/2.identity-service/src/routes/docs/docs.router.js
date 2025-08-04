@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Load the single combined OpenAPI spec
 function loadYaml() {
-  const filePath = path.join(__dirname, '../openapi/bundled.yaml');
+  const filePath = path.join(__dirname, '../../docs/openapi/bundled.yaml');
   console.log('Loading OpenAPI spec from:', filePath);
 
   if (fs.existsSync(filePath)) {
@@ -29,7 +29,7 @@ router.use('/swagger', swaggerUi.serve, (req, res, next) => {
 
 // Serve ReDoc at /docs/redoc (using pre-bundled HTML)
 router.use('/redoc', (req, res) => {
-  const filePath = path.join(__dirname, '../redoc/index.html');
+  const filePath = path.join(__dirname, '../../docs/redoc/index.html');
   if (fs.existsSync(filePath)) {
     return res.sendFile(filePath);
   } else {

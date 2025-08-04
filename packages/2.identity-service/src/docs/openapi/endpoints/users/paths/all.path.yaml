@@ -1,0 +1,14 @@
+get:
+  tags: [User]
+  summary: List all users (admin only)
+  operationId: all-users
+  security: [{ BearerAuth: [] }]
+  responses:
+    '200':
+      $ref: '../users.responses.yaml#/GetUsersSuccess'
+    '401':
+      $ref: '../users.responses.yaml#/Unauthorized'
+    '403':
+      $ref: '../users.responses.yaml#/Forbidden'
+    '500':
+      $ref: '../users.responses.yaml#/ServerError'

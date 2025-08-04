@@ -1,0 +1,27 @@
+SendOTPSuccess:
+  description: OTP code sent successfully
+  content:
+    application/json:
+      schema:
+        $ref: './otp.schema.yaml#/SendOTPResponse'
+
+SendOTPBadRequest:
+  description: Validation failed (e.g. missing email/phone)
+  content:
+    application/json:
+      schema:
+        $ref: './otp.schema.yaml#/ErrorResponse'
+
+SendOTPNotFound:
+  description: User not found for given email or phone
+  content:
+    application/json:
+      schema:
+        $ref: './otp.schema.yaml#/ErrorResponse'
+
+ServerError:
+  description: Internal server error
+  content:
+    application/json:
+      schema:
+        $ref: './otp.schema.yaml#/ServerError'

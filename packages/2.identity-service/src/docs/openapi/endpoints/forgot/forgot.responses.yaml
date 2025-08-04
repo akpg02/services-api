@@ -1,0 +1,20 @@
+ForgotSuccess:
+  description: Password reset link sent to email
+  content:
+    application/json:
+      schema:
+        $ref: './forgot.schema.yaml#/ForgotResponse'
+
+BadRequestForgot:
+  description: Invalid inputs or user not found
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: false
+          message:
+            type: string
+            example: 'Invalid request'

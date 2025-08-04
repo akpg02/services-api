@@ -1,0 +1,20 @@
+patch:
+  tags: [User]
+  summary: Change username for the authenticated user
+  operationId: change-username
+  security: [{ BearerAuth: [] }]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../user.schema.yaml#/ChangeUsernameRequest'
+  responses:
+    '200':
+      $ref: '../users.responses.yaml#/UpdateSuccess'
+    '400':
+      $ref: '../users.responses.yaml#/ValidationError'
+    '401':
+      $ref: '../users.responses.yaml#/Unauthorized'
+    '500':
+      $ref: '../users.responses.yaml#/ServerError'

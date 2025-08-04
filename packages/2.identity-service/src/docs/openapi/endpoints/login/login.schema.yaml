@@ -1,0 +1,44 @@
+LoginRequest:
+  type: object
+  description: Login with either email + password or username + password
+  oneOf:
+    - type: object
+      description: Login via email
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: secret123
+    - type: object
+      description: Login via username
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: user123
+        password:
+          type: string
+          format: password
+          example: secret123
+
+LoginResponse:
+  type: object
+  properties:
+    accessToken:
+      type: string
+      example: eyJo...
+    refreshToken:
+      type: string
+      example: ooiu...
+    authId:
+      type: string
+      example: ou9qw0r8qhf...

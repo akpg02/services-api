@@ -1,0 +1,27 @@
+RefreshSuccess:
+  description: Access token refreshed successfully
+  content:
+    application/json:
+      schema:
+        $ref: './refresh.schema.yaml#/RefreshResponse'
+
+RefreshErrorMissing:
+  description: No refresh token provided
+  content:
+    application/json:
+      schema:
+        $ref: './refresh.schema.yaml#/ErrorResponse'
+
+RefreshErrorForbidden:
+  description: Malformed or tampered refresh token (signature verification failed)
+  content:
+    application/json:
+      schema:
+        $ref: './refresh.schema.yaml#/ErrorResponse'
+
+ServerError:
+  description: Internal server error
+  content:
+    application/json:
+      schema:
+        $ref: './refresh.schema.yaml#/ServerError'

@@ -1,0 +1,42 @@
+LogoutResponse:
+  type: object
+  description: The tokens that were invalidated on logout.
+  properties:
+    accessToken:
+      type: string
+      description: The (now-revoked) access token that was in use.
+      example: eyJo0eXAiOiJKV1QiLCJhbGciOiJ...
+    refreshToken:
+      type: string
+      description: The (now-revoked) refresh token that was stored in the cookie.
+      example: ooiu89as7d9f87as9df...
+    authId:
+      type: string
+      description: The user’s auth record ID whose tokens were revoked.
+      example: ou9qw0r8qhf7ase8f...
+  required:
+    - accessToken
+    - refreshToken
+    - authId
+
+ErrorResponse:
+  type: object
+  description: Standard error response
+  properties:
+    success:
+      type: boolean
+      description: Indicates the call failed
+      example: false
+    message:
+      type: string
+      description: Human-readable error message
+      example: Invalid or expired refresh token
+    details:
+      type: array
+      description: Additional error details or validation failures
+      items:
+        type: string
+        example: 'Username is required'
+  required:
+    - success
+    - message

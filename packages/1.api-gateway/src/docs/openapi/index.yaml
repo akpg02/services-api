@@ -1,16 +1,63 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: eShop Gateway API
+  title: eServices API Gateway
   version: 1.0.0
+  description: Aggregated API for all microservices
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT"
 
 servers:
   - url: http://localhost:8000
+    description: Local dev
 
 paths:
-  $ref: './bundled.yaml#/paths'
+  /health:
+    get:
+      summary: Check API Gateway health
+      operationId: getGatewayHealth
+      responses:
+        '200':
+          description: Gateway is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  uptime: { type: number }
+                  timestamp: { type: integer }
+
+  # Identity service endpoints:
+  /v1/auth/login:
+    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1login'
+  /v1/auth/logout:
+    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1logout'
+  /v1/auth/register:
+    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1register'
+  /v1/auth/forgot-password:
+    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1forgot-password'
+  /v1/auth/verify-email:
+    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1verify-email'
+  /v1/auth/refresh-token:
+    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1refresh-token'
+  /v1/auth/reset-password/{token}:
+    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1reset-password~1{token}'
+
+  /v1/users/me:
+    $ref: './services/identity/index.yaml#/paths/~1v1~1users~1me'
+  /v1/users/me/deactivate-account:
+    $ref: './services/identity/index.yaml#/paths/~1v1~1users~1me~1deactivate-account'
+  # …etc for each path…
 
 components:
-  $ref: './bundled.yaml#/components'
+  schemas:
+    $ref: './services/identity/index.yaml#/components/schemas'
+  responses:
+    $ref: './services/identity/index.yaml#/components/responses'
+  securitySchemes:
+    BearerAuth:
+      $ref: './services/identity/index.yaml#/components/securitySchemes/BearerAuth'
 
 security:
   - BearerAuth: []

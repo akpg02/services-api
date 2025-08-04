@@ -1,0 +1,59 @@
+RefreshResponse:
+  type: object
+  description: Newly issued access token; refresh token cookie is also rotated
+  properties:
+    accessToken:
+      type: string
+      description: New JWT access token
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp...
+  required:
+    - accessToken
+
+ErrorResponse:
+  type: object
+  description: Standard error response
+  properties:
+    success:
+      type: boolean
+      description: Indicates whether the operation failed
+      example: false
+    message:
+      type: string
+      description: Invalid or expired refresh token
+      example: Invalid or expired refresh token
+    details:
+      type: array
+      description: Optional list of error details (e.g. validation failures)
+      items:
+        type: string
+        example: 'Username is required'
+  required:
+    - success
+    - message
+
+ServerError:
+  type: object
+  description: Standard server error response
+  properties:
+    success:
+      type: boolean
+      description: Indicates the call failed
+      example: false
+    message:
+      type: string
+      description: Something went wrong
+      example: Internal server error
+    timestamp:
+      type: string
+      format: date-time
+      description: Time when the error occurred
+      example: '2025-05-23T17:00:00Z'
+    details:
+      type: array
+      description: Optional list of additional details (e.g. stack trace snippets)
+      items:
+        type: string
+        example: 'Database connection timed out'
+  required:
+    - success
+    - message

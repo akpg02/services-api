@@ -1,0 +1,21 @@
+# src/openapi/endpoints/otp/verify.responses.yaml
+VerifyOTPSuccess:
+  description: OTP verified; new access token issued
+  content:
+    application/json:
+      schema:
+        $ref: './otp.schema.yaml#/VerifyOTPResponse'
+
+VerifyOTPBadRequest:
+  description: Validation failed or invalid/expired OTP
+  content:
+    application/json:
+      schema:
+        $ref: './otp.schema.yaml#/ErrorResponse'
+
+ServerError:
+  description: Internal server error
+  content:
+    application/json:
+      schema:
+        $ref: './otp.schema.yaml#/ErrorResponse'

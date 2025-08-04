@@ -9,13 +9,18 @@
     "build": "babel src -d dist",
     "start": "node src/server.js",
     "cluster": "pm2 start src/server.js -i max",
-    "worker": "node src/workers/email-processor.js"
+    "worker": "node src/workers/email-processor.js",
+    "lint": "redocly lint src/docs/openapi/bundled.yaml",
+    "build:redoc": "npx redocly build-docs src/docs/openapi/index.yaml -o src/docs/redoc/index.html",
+    "bundle:openapi": "swagger-cli bundle src/docs/openapi/index.yaml --outfile src/openapi/bundled.yaml --type yaml",
+    "dev:docs": "concurrently \"npm run build:redoc\" \"npm run bundle:openapi\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@redocly/openapi-cli": "^0.12.16",
     "concurrently": "^9.1.2",
     "nodemon": "^3.1.9"
   },

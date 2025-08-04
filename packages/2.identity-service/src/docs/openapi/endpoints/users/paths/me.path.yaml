@@ -1,0 +1,12 @@
+get:
+  tags: [User]
+  summary: Get the authenticated user's profile
+  operationId: user-me
+  security: [{ BearerAuth: [] }]
+  responses:
+    '200':
+      $ref: '../users.responses.yaml#/GetUserSuccess'
+    '401':
+      $ref: '../users.responses.yaml#/Unauthorized'
+    '500':
+      $ref: '../users.responses.yaml#/ServerError'

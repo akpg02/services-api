@@ -1,0 +1,69 @@
+GetUsersSuccess:
+  description: List of users retrieved
+  content:
+    application/json:
+      schema:
+        $ref: './user.schema.yaml#/UsersListResponse'
+
+GetUserSuccess:
+  description: Single user retrieved
+  content:
+    application/json:
+      schema:
+        $ref: './user.schema.yaml#/UserResponse'
+
+UpdateSuccess:
+  description: Entity updated successfully
+  content:
+    application/json:
+      schema:
+        $ref: './user.schema.yaml#/UserResponse'
+
+DeactivateSuccess:
+  description: Account deactivated successfully
+  content:
+    application/json:
+      schema:
+        $ref: './user.schema.yaml#/GenericSuccess'
+
+Unauthorized:
+  description: Missing or invalid authentication
+  content:
+    application/json:
+      schema:
+        $ref: './error.yaml#/ErrorResponse'
+
+Forbidden:
+  description: Insufficient permissions
+  content:
+    application/json:
+      schema:
+        $ref: './error.yaml#/ErrorResponse'
+
+InvalidId:
+  description: Invalid user ID supplied
+  content:
+    application/json:
+      schema:
+        $ref: './error.yaml#/ErrorResponse'
+
+NotFound:
+  description: User not found
+  content:
+    application/json:
+      schema:
+        $ref: './error.yaml#/ErrorResponse'
+
+ValidationError:
+  description: Request validation failed
+  content:
+    application/json:
+      schema:
+        $ref: './error.yaml#/ErrorResponse'
+
+ServerError:
+  description: Internal server error
+  content:
+    application/json:
+      schema:
+        $ref: './error.yaml#/ServerError'

@@ -1,0 +1,15 @@
+post:
+  tags:
+    - Auth
+    - Token
+  summary: Refresh an expired access token
+  operationId: refreshToken
+  responses:
+    '200':
+      $ref: './refresh.responses.yaml#/RefreshSuccess'
+    '401':
+      $ref: './refresh.responses.yaml#/RefreshErrorMissing'
+    '403':
+      $ref: './refresh.responses.yaml#/RefreshErrorForbidden'
+    '500':
+      $ref: './refresh.responses.yaml#/ServerError'

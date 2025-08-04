@@ -5,7 +5,7 @@ const fs = require('fs');
 
 // Load the single combined OpenAPI spec
 function loadYaml() {
-  const filePath = path.join(__dirname, '../docs/openapi/bundled.yaml');
+  const filePath = path.join(__dirname, '../../docs/openapi/bundled.yaml');
   console.log('Loading OpenAPI spec from:', filePath);
 
   if (fs.existsSync(filePath)) {
@@ -23,7 +23,7 @@ exports.swaggerDoc = async (req, res, next) => {
 };
 
 exports.redoc = (req, res) => {
-  const filePath = path.join(__dirname, '../docs/redoc/index.html');
+  const filePath = path.join(__dirname, '../../docs/redoc/index.html');
   if (fs.existsSync(filePath)) {
     return res.sendFile(filePath);
   } else {

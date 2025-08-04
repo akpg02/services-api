@@ -1,0 +1,25 @@
+put:
+  tags: [User]
+  summary: Deactivate another user's account (admin only)
+  operationId: deactivate-user
+  security: [{ BearerAuth: [] }]
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the user to deactivate
+  responses:
+    '200':
+      $ref: '../users.responses.yaml#/DeactivateSuccess'
+    '400':
+      $ref: '../users.responses.yaml#/InvalidId'
+    '401':
+      $ref: '../users.responses.yaml#/Unauthorized'
+    '403':
+      $ref: '../users.responses.yaml#/Forbidden'
+    '404':
+      $ref: '../users.responses.yaml#/NotFound'
+    '500':
+      $ref: '../users.responses.yaml#/ServerError'

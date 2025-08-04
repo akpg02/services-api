@@ -1,30 +1,33 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: eServices Gateway API (bundle)
+  title: eServices API Gateway
   version: 1.0.0
   description: Aggregated API for all microservices
   license:
     name: MIT
-    url: 'https://opensource.org/licenses/MIT'
+    url: 'https://opensource.org/licenses/MIT"'
 servers:
   - url: 'http://localhost:8000'
+    description: Local dev
 paths:
   /health:
     get:
-      servers:
-        - url: 'http://localhost:3000/v1/auth'
-          description: Via API Gateway
-        - url: 'http://localhost:3001'
-          description: Identity Service Direct
-      summary: Health check
-      operationId: getHealth
-      tags:
-        - Health
+      summary: Check API Gateway health
+      operationId: getGatewayHealth
       responses:
         '200':
-          $ref: '#/components/responses/HealthSuccess'
-        '400':
-          $ref: '#/components/responses/HealthError'
+          description: Gateway is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  uptime:
+                    type: number
+                  timestamp:
+                    type: integer
   /v1/auth/login:
     post:
       summary: User login
@@ -908,7 +911,7 @@ components:
         - type: object
           description: Receive OTP via phone
           required:
-            - phon3
+            - phone
           properties:
             phone:
               type: string
@@ -1226,10 +1229,10 @@ components:
               message:
                 type: string
                 example: Invalid or expired refresh token
-securitySchemes:
-  BearerAuth:
-    type: http
-    scheme: bearer
-    bearerFormat: JWT
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 security:
   - BearerAuth: []

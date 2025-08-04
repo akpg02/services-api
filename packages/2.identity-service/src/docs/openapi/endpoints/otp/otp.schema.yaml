@@ -1,0 +1,136 @@
+SendOTPRequest:
+  type: object
+  description: Request to send an OTP via email or SMS
+  properties:
+    email:
+      type: string
+      format: email
+      example: user@example.com
+    phone:
+      type: string
+      example: '+15555550123'
+  oneOf:
+    - type: object
+      description: Receive OTP via email
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+    - type: object
+      description: Receive OTP via phone
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          example: '+15555550123'
+
+SendOTPResponse:
+  type: object
+  description: Acknowledgement that the OTP was sent
+  properties:
+    success:
+      type: boolean
+      example: true
+    message:
+      type: string
+      example: OTP sent via email
+  required: [success, message]
+
+VerifyOTPRequest:
+  type: object
+  description: Request to verify an OTP code
+  properties:
+    email:
+      type: string
+      format: email
+      example: user@example.com
+    phone:
+      type: string
+      example: '+15555550123'
+    otp:
+      type: string
+      example: '123456'
+  required: [otp]
+  oneOf:
+    - type: object
+      description: Receive OTP via email
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+    - type: object
+      description: Receive OTP via phone
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          example: '+15555550123'
+
+VerifyOTPResponse:
+  type: object
+  description: Access token issued after successful OTP verification
+  properties:
+    success:
+      type: boolean
+      example: true
+    accessToken:
+      type: string
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  required: [success, accessToken]
+
+ErrorResponse:
+  type: object
+  description: Standard error response
+  properties:
+    success:
+      type: boolean
+      description: Indicates the call failed
+      example: false
+    message:
+      type: string
+      description: Human-readable error message
+      example: Invalid or expired refresh token
+    details:
+      type: array
+      description: Additional error details or validation failures
+      items:
+        type: string
+        example: 'Username is required'
+  required:
+    - success
+    - message
+
+ServerError:
+  type: object
+  description: Internal server error response
+  properties:
+    success:
+      type: boolean
+      description: Indicates the call failed
+      example: false
+    message:
+      type: string
+      description: Human-readable error message
+      example: Internal server error
+    timestamp:
+      type: string
+      format: date-time
+      description: Time when the error occurred
+      example: '2025-05-23T17:00:00Z'
+    details:
+      type: array
+      description: Optional list of additional error details (e.g. stack trace snippets)
+      items:
+        type: string
+        example: Database connection timed out
+  required:
+    - success
+    - message

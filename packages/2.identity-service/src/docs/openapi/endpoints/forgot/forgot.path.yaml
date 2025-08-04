@@ -1,0 +1,21 @@
+post:
+  summary: Forgot password
+  operationId: Forgotpswd
+  tags:
+    - Auth
+    - Local
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: './forgot.schema.yaml#/ForgotRequest'
+  responses:
+    '200':
+      $ref: './forgot.responses.yaml#/ForgotSuccess'
+    '400':
+      $ref: './forgot.responses.yaml#/BadRequestForgot'
+    '500':
+      $ref: '../../components/responses/server-error.yaml#/ServerError'
+    '404':
+      $ref: '../../components/responses/not-found.yaml#/NotFound'

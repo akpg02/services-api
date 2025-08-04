@@ -1,0 +1,94 @@
+User:
+  type: object
+  description: A user record
+  properties:
+    id:
+      type: string
+      description: MongoDB ObjectId
+      example: '60af7c57b6e99974b8e8cea1'
+    username:
+      type: string
+      example: 'johndoe'
+    email:
+      type: string
+      format: email
+      example: 'john.doe@example.com'
+    role:
+      type: string
+      example: 'user'
+    isActive:
+      type: boolean
+      example: true
+
+UsersListResponse:
+  type: object
+  description: A paginated list of users
+  properties:
+    count:
+      type: integer
+      example: 42
+    data:
+      type: array
+      items:
+        $ref: 'user.schema.yaml#/User'
+  required: [count, data]
+
+UserResponse:
+  type: object
+  description: Single-user payload
+  properties:
+    data:
+      $ref: 'user.schema.yaml#/User'
+  required: [data]
+
+ChangePasswordRequest:
+  type: object
+  description: Change the current user's password
+  properties:
+    currentPassword:
+      type: string
+      example: 'oldP@ssw0rd'
+    newPassword:
+      type: string
+      example: 'n3wP@ss!'
+  required: [currentPassword, newPassword]
+
+ChangeUsernameRequest:
+  type: object
+  description: Change the current user's username
+  properties:
+    username:
+      type: string
+      example: 'newusername'
+  required: [username]
+
+ChangeEmailRequest:
+  type: object
+  description: Change the current user's email
+  properties:
+    email:
+      type: string
+      format: email
+      example: 'new.email@example.com'
+  required: [email]
+
+ChangeRoleRequest:
+  type: object
+  description: Change another user's role (admin only)
+  properties:
+    role:
+      type: string
+      example: 'admin'
+  required: [role]
+
+GenericSuccess:
+  type: object
+  description: Generic success response
+  properties:
+    success:
+      type: boolean
+      example: true
+    message:
+      type: string
+      example: 'Operation completed successfully'
+  required: [success, message]

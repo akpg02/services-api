@@ -1,0 +1,19 @@
+post:
+  tags:
+    - Auth
+    - OTP
+  summary: Verify a one-time password (OTP) and issue tokens
+  operationId: verifyOTP
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: './otp.schema.yaml#/VerifyOTPRequest'
+  responses:
+    '200':
+      $ref: './verify.responses.yaml#/VerifyOTPSuccess'
+    '400':
+      $ref: './verify.responses.yaml#/VerifyOTPBadRequest'
+    '500':
+      $ref: './verify.responses.yaml#/ServerError'

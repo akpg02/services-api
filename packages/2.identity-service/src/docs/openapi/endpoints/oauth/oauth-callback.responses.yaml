@@ -1,0 +1,15 @@
+OAuthCallbackRedirect:
+  description: OAuth callback redirects the user to the dashboard with a new access token
+  headers:
+    Location:
+      description: Redirect URL including the access token as a query param
+      schema:
+        type: string
+        example: /dashboard?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+OAuthSuccess:
+  description: OAuth callback success
+  content:
+    application/json:
+      schema:
+        $ref: './oauth-callback.schema.yaml#/OAuthResponse'
