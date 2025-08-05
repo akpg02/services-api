@@ -1,7 +1,10 @@
 const express = require('express');
+const path = require('path');
+const crypto = require('crypto');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+const docsRoutes = require('./routes/docs/docs.router');
 const { xss } = require('express-xss-sanitizer');
 const { rateLimit } = require('express-rate-limit');
 const { RedisStore } = require('rate-limit-redis');
@@ -18,8 +21,33 @@ const routes = require('./routes/index.router');
 const app = express();
 const redisClient = new Redis(process.env.REDIS_URL);
 
-// Security headers
-app.use(helmet());
+app.use((_req, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        'https://cdn.redocly.com',
+        (_req, res) => `'nonce-${res.locals.nonce}'`,
+      ],
+      scriptSrcElem: [
+        "'self'",
+        'https://cdn.redocly.com',
+        (_req, res) => `'nonce-${res.locals.nonce}'`,
+      ],
+      workerSrc: ["'self'", 'blob:'],
+      childSrc: ["'self'", 'blob:'],
+      connectSrc: ["'self'", 'blob:'],
+    },
+  })
+);
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 // Credentials & CORS
 app.use(credentials);
@@ -57,8 +85,15 @@ app.use((req, res, next) => {
 // Proxy setup
 setupProxies(app);
 
+app.use(
+  '/docs/openapi',
+  express.static(path.join(__dirname, 'docs', 'openapi'))
+);
+
 // Application routes
 app.use('/', routes);
+
+app.use('/docs', docsRoutes);
 
 // catch-all 404 handler
 app.use((_req, res, _next) => {

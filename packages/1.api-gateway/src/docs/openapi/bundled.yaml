@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: eServices API Gateway
+  title: eServices API Gateway (bundle)
   version: 1.0.0
   description: Aggregated API for all microservices
   license:
@@ -12,22 +12,20 @@ servers:
 paths:
   /health:
     get:
-      summary: Check API Gateway health
-      operationId: getGatewayHealth
+      servers:
+        - url: 'http://localhost:8000/v1/auth'
+          description: Via API Gateway
+        - url: 'http://localhost:8001'
+          description: Identity Service Direct
+      summary: Health check
+      operationId: getHealth
+      tags:
+        - Health
       responses:
         '200':
-          description: Gateway is healthy
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  uptime:
-                    type: number
-                  timestamp:
-                    type: integer
+          $ref: '#/components/responses/HealthSuccess'
+        '400':
+          $ref: '#/components/responses/HealthError'
   /v1/auth/login:
     post:
       summary: User login
