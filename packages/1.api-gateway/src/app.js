@@ -33,12 +33,12 @@ app.use(
       scriptSrc: [
         "'self'",
         'https://cdn.redocly.com',
-        (req, res) => `'nonce-${res.locals.nonce}'`,
+        (_req, res) => `'nonce-${res.locals.nonce}'`,
       ],
       scriptSrcElem: [
         "'self'",
         'https://cdn.redocly.com',
-        (req, res) => `'nonce-${res.locals.nonce}'`,
+        (_req, res) => `'nonce-${res.locals.nonce}'`,
       ],
       workerSrc: ["'self'", 'blob:'],
       childSrc: ["'self'", 'blob:'],
