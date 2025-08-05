@@ -12,7 +12,7 @@
     "worker": "node src/workers/email-processor.js",
     "lint": "redocly lint src/docs/openapi/bundled.yaml",
     "build:redoc": "npx redocly build-docs src/docs/openapi/index.yaml -o src/docs/redoc/index.html",
-    "bundle:openapi": "swagger-cli bundle src/docs/openapi/index.yaml --outfile src/openapi/bundled.yaml --type yaml",
+    "bundle:openapi": "swagger-cli bundle src/docs/openapi/index.yaml --outfile src/docs/openapi/bundled.yaml --type yaml",
     "dev:docs": "concurrently \"npm run build:redoc\" \"npm run bundle:openapi\""
   },
   "keywords": [],
@@ -32,6 +32,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^7.5.0",

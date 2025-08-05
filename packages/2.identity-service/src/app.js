@@ -1,4 +1,6 @@
 const express = require('express');
+const path = require('path');
+const crypto = require('crypto');
 const Redis = require('ioredis');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -22,6 +24,34 @@ const {
 const app = express();
 
 const redisClient = new Redis(process.env.REDIS_URL);
+
+app.use((_req, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
+
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        'https://cdn.redocly.com',
+        (_req, res) => `'nonce-${res.locals.nonce}'`,
+      ],
+      scriptSrcElem: [
+        "'self'",
+        'https://cdn.redocly.com',
+        (_req, res) => `'nonce-${res.locals.nonce}'`,
+      ],
+      workerSrc: ["'self'", 'blob:'],
+      childSrc: ["'self'", 'blob:'],
+      connectSrc: ["'self'", 'blob:'],
+    },
+  })
+);
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 // Credentials & CORS
 app.use(credentials);
@@ -94,11 +124,16 @@ const sensitiveEnpointRateLimit = rateLimit({
 // apply this sensitive enpoints limiter
 app.use('/api/auth/register', sensitiveEnpointRateLimit);
 
-// Health endpoint at GET /
-app.use('/', healthRoutes);
+app.use(
+  '/docs/openapi',
+  express.static(path.join(__dirname, 'docs', 'openapi'))
+);
 
 // Swagger / ReDoc at GET /docs/*
 app.use('/docs', docsRoutes);
+
+// Health endpoint at GET /
+app.use('/', healthRoutes);
 
 // Routes
 app.use(
