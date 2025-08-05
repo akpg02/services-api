@@ -90,10 +90,10 @@ app.use(
   express.static(path.join(__dirname, 'docs', 'openapi'))
 );
 
+app.use('/docs', docsRoutes);
+
 // Application routes
 app.use('/', routes);
-
-app.use('/docs', docsRoutes);
 
 // catch-all 404 handler
 app.use((_req, res, _next) => {

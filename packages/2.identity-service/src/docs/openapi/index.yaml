@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Identity Service API
+  title: Identity Service Microservice
   version: 1.0.0
   description: Authentication and authorization of users.
   license:
