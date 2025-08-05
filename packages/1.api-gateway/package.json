@@ -9,8 +9,9 @@
     "start": "node src/server.js",
     "cluster": "pm2 start src/server.js -i max",
     "lint:redoc": "npx redocly lint src/docs/openapi/index.yaml",
-    "build:redoc": "npx redocly build-docs src/docs/openapi/index.yaml -o src/docs/redoc/index.html",
     "bundle:openapi": "swagger-cli bundle src/docs/openapi/index.yaml --outfile src/docs/openapi/bundled.yaml --type yaml",
+    "build:redoc": "npx @redocly/cli build-docs src/docs/openapi/bundled.yaml -o src/docs/redoc/index.html",
+    "dev:docs": "npm run bundle:openapi && npm run build:redoc",
     "bundle:identity": "swagger-cli bundle ../2.identity-service/src/docs/openapi/index.yaml --outfile src/docs/openapi/services/identity/index.yaml --type yaml"
   },
   "keywords": [],
@@ -26,6 +27,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
+    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-http-proxy": "^2.1.1",
     "express-rate-limit": "^8.0.1",
@@ -42,6 +44,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-cli": "^4.0.4",
+    "@redocly/cli": "^2.0.2",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
     "swagger-combine": "^1.4.0"

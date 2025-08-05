@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: eServices API Gateway
+  title: eServices API Gateway (bundle)
   version: 1.0.0
   description: Aggregated API for all microservices
   license:
@@ -12,43 +12,7 @@ servers:
     description: Local dev
 
 paths:
-  /health:
-    get:
-      summary: Check API Gateway health
-      operationId: getGatewayHealth
-      responses:
-        '200':
-          description: Gateway is healthy
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string }
-                  uptime: { type: number }
-                  timestamp: { type: integer }
-
-  # Identity service endpoints:
-  /v1/auth/login:
-    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1login'
-  /v1/auth/logout:
-    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1logout'
-  /v1/auth/register:
-    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1register'
-  /v1/auth/forgot-password:
-    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1forgot-password'
-  /v1/auth/verify-email:
-    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1verify-email'
-  /v1/auth/refresh-token:
-    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1refresh-token'
-  /v1/auth/reset-password/{token}:
-    $ref: './services/identity/index.yaml#/paths/~1v1~1auth~1reset-password~1{token}'
-
-  /v1/users/me:
-    $ref: './services/identity/index.yaml#/paths/~1v1~1users~1me'
-  /v1/users/me/deactivate-account:
-    $ref: './services/identity/index.yaml#/paths/~1v1~1users~1me~1deactivate-account'
-  # …etc for each path…
+  $ref: './services/identity/index.yaml#/paths'
 
 components:
   schemas:

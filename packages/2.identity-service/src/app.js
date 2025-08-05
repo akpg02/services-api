@@ -23,9 +23,6 @@ const app = express();
 
 const redisClient = new Redis(process.env.REDIS_URL);
 
-// Security headers
-app.use(helmet());
-
 // Credentials & CORS
 app.use(credentials);
 app.use(cors(corsOptions));
