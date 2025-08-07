@@ -1,6 +1,5 @@
-const Queue = require('bull');
-const Auth = require('../../../models/auth.model');
-const RefreshToken = require('../../../models/token.model');
+const { findUserById } = require('../../../models/auth.model');
+const { deleteAllUserTokens } = require('../../../models/token.model');
 const { changePasswordSchema } = require('../../../schemes/password');
 const { logger, publishEvent } = require('@gaeservices/common');
 
@@ -19,7 +18,7 @@ exports.password = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     // locate  current logged in user
-    const user = await Auth.findById(req.user.id);
+    const user = await findUserById(req.user.id);
 
     if (!user) {
       logger.warn('User not found');
@@ -41,7 +40,7 @@ exports.password = async (req, res) => {
     user.password = newPassword;
     await user.save();
 
-    await RefreshToken.deleteMany({ user: req.user.id });
+    await deleteAllUserTokens(req.user.id);
 
     // TODO: Publish event?
 

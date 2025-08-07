@@ -1,4 +1,4 @@
-const Auth = require('../../../models/auth.model');
+const { findUserByEmailOrPhone } = require('../../../models/auth.model');
 const Queue = require('bull');
 const { sendSMS } = require('../../../utils/sms');
 const { logger } = require('@gaeservices/common');
@@ -18,7 +18,7 @@ exports.sendOTP = async (req, res) => {
     }
     const { email, phone } = value;
 
-    const user = await Auth.findOne(email ? { email } : { phone });
+    const user = await findUserByEmailOrPhone(email, phone);
     if (!user)
       return res
         .status(404)

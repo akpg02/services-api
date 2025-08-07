@@ -1,5 +1,12 @@
-const RefreshToken = require('../../models/token.model');
-const Auth = require('../.././models/auth.model');
+const {
+  fetchToken,
+  deleteAllUserTokens,
+  deleteToken,
+} = require('../../models/token.model');
+const {
+  findUserById,
+  findUserByEmailOrUsername,
+} = require('../.././models/auth.model');
 const jwt = require('jsonwebtoken');
 const { logger } = require('@gaeservices/common');
 const { generateTokens } = require('../../utils/generate-token');
@@ -22,14 +29,14 @@ exports.refreshToken = async (req, res) => {
       sameSite: 'lax',
     });
 
-    const storedToken = await RefreshToken.findOne({ token: refreshToken });
+    const storedToken = await fetchToken(refreshToken);
     if (!storedToken || storedToken.expiresAt < new Date()) {
       logger.warn('Invalid or expired refresh token');
       return res
         .status(401)
         .json({ success: false, message: 'Invalid or expired refresh token' });
     }
-    const user = await Auth.findById(storedToken.user);
+    const user = await findUserById(storedToken.user);
     if (!user) {
       jwt.verify(
         refreshToken,
@@ -39,10 +46,8 @@ exports.refreshToken = async (req, res) => {
             return res
               .status(403)
               .json({ success: false, message: 'Forbidden' });
-          const hackedUser = await Auth.findOne({
-            username: decoded.username,
-          }).exec();
-          await RefreshToken.deleteMany({ user: hackedUser._id });
+          const hackedUser = await findUserByEmailOrUsername(decoded.username);
+          await deleteAllUserTokens(hackedUser._id);
 
           return res
             .status(401)
@@ -55,11 +60,11 @@ exports.refreshToken = async (req, res) => {
     const { accessToken: newAccessToken } = await generateTokens(res, user);
 
     // delete the old refresh token
-    await RefreshToken.deleteOne({ _id: storedToken._id });
+    await deleteToken(storedToken._id);
 
     res.json({ accessToken: newAccessToken });
-  } catch (error) {
-    logger.error('Refresh token error occurred', error);
+  } catch (err) {
+    logger.error('Refresh token error occurred', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };

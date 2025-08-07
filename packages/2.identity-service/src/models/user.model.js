@@ -1,61 +1,50 @@
-const mongoose = require('mongoose');
+const userDB = require('./user.mongo');
 
-const userSchema = new mongoose.Schema(
-  {
-    authId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Auth',
-      required: [true, 'User is required'],
-      unique: true,
-    },
-    profile: {
-      firstname: {
-        type: String,
-        required: [true, 'First name is required'],
-        trim: true,
-      },
-      lastname: {
-        type: String,
-        required: [true, 'Last name is required'],
-        trim: true,
-      },
-      avatarids: [
-        {
-          type: String,
-        },
-      ],
-      bio: {
-        type: String,
-      },
-      preferences: {
-        darkMode: { type: Boolean, default: false },
-        language: { type: String, default: 'en' },
-      },
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-  },
-  {
-    toJSON: {
-      transform(_doc, ret) {
-        ret.id = ret._id; // Add `id` field from `_id`
-        delete ret._id; // Delete the `_id` field
-        delete ret.__v; // Delete the `__v` field
-      },
-    },
-    timestamps: true,
+async function fetchAllUsers() {
+  return userDB.find({});
+}
+
+async function fetchUserById(id) {
+  return userDB.findById(id).populate({
+    path: 'authId',
+    match: { isActive: true },
+    select: '-password -emailVerificationToken -passwordResetToken -__v',
+  });
+}
+async function findUserWithAuthId(authId, { includeRole = false } = {}) {
+  const excludeFields = [
+    '-password',
+    '-emailVerificationToken',
+    '-isActive',
+    '-lastActiveAt',
+    '-emailVerified',
+    '-passwordResetExpiresAt',
+  ];
+
+  if (!includeRole) {
+    excludeFields.push('-role');
   }
-);
+  return userDB
+    .findOne({ authId })
+    .populate({ path: 'authId', select: excludeFields.join(' ') });
+}
 
-userSchema.pre(/^find/, function (next) {
-  // If the operation is a findOneAndUpdate or similar update, skip the filter.
-  if (this.op.startsWith('findOneAndUpdate') || this.op.startsWith('update')) {
-    return next();
-  }
-  this.find({ isActive: { $ne: false } });
-  next();
-});
+async function updateUser(id, updates) {
+  return await userDB.findOneAndUpdate({ authId: id }, updates, { new: true });
+}
 
-module.exports = mongoose.model('User', userSchema);
+async function deactivateUserId(authId, options = {}) {
+  await userDB.findOneAndUpdate(
+    authId,
+    { isActive: false },
+    { new: true, session: options.session }
+  );
+}
+
+module.exports = {
+  updateUser,
+  deactivateUserId,
+  findUserWithAuthId,
+  fetchAllUsers,
+  fetchUserById,
+};

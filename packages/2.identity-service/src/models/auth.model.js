@@ -1,137 +1,109 @@
-const mongoose = require('mongoose');
-const crypto = require('crypto');
-const argon2 = require('argon2');
+const { default: mongoose } = require('mongoose');
+const authDB = require('./auth.mongo');
+const userDB = require('./user.mongo');
 
-const authSchema = new mongoose.Schema(
-  {
-    email: {
-      type: String,
-      unique: true,
-      trim: true,
-      required: [true, 'Email is required'],
-      lowercase: true,
-    },
-    username: {
-      type: String,
-      unique: true,
-      trim: true,
-      required: [true, 'Username is required'],
-      lowercase: true,
-    },
-    phone: {
-      type: String,
-    },
-    password: {
-      type: String,
-      trim: true,
-      required: [true, 'Password is required'],
-    },
-    role: {
-      type: [String],
-      enum: ['buyer', 'seller', 'admin', 'user', 'service'], // 'service' is a 'system' or 'machine' role assign to tokens used by other backend services (e.g. your Order, Inventory or Shipping Service)
-      default: ['user'],
-    },
-    googleId: String,
-    facebookId: String,
-    githubId: String,
-    appleId: String,
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    lastActiveAt: {
-      type: Date,
-      default: Date.now,
-    },
-    emailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    otp: String,
-    otpExpires: Date,
-    pendingEmail: String,
-    emailVerificationToken: String,
-    verifcationTokenExpiresAt: Date,
-    passwordChangedAt: Date,
-    passwordResetToken: String,
-    passwordResetExpiresAt: {
-      type: Date,
-      default: () => Date.now() + 3600000, // 1 hour from now
-    },
-  },
-  {
-    toJSON: {
-      transform(_doc, ret) {
-        ret.id = ret._id; // Add `id` field from `_id`
-        delete ret._id; // Delete the `_id` field
-        delete ret.__v; // Delete the `__v` field
-      },
-    },
-    timestamps: true,
-  }
-);
+async function registerUser({
+  email,
+  username,
+  password,
+  phone,
+  profile,
+  emailVerificationToken,
+  verifcationTokenExpiresAt,
+}) {
+  const session = await mongoose.startSession();
+  let authDoc, userDoc;
 
-authSchema.pre('save', function (next) {
-  if (this.role && Array.isArray(this.role)) {
-    this.role = this.role.map((role) => role.trim().replace(/,$/, ''));
-  }
-  next();
-});
-
-authSchema.pre('save', async function (next) {
-  if (this.isModified('password')) {
-    try {
-      this.password = await argon2.hash(this.password);
-    } catch (error) {
-      return next(error);
-    }
-  }
-});
-
-authSchema.pre('save', async function (next) {
-  // Only update the passwordChangedAt field if the password has been changed
-  if (!this.isModified('password') || this.isNew) return next();
-  // ensures that the token is created after the password has been changed
-  this.passwordChangedAt = Date.now() - 1000;
-  next();
-});
-
-authSchema.pre('save', function (next) {
-  if (this.isModified('isActive') || this.isNew) {
-    this.lastActiveAt = new Date();
-  }
-  next();
-});
-
-authSchema.methods.comparePassword = async function (candidatePassword) {
   try {
-    return await argon2.verify(this.password, candidatePassword);
-  } catch (error) {
-    throw error;
+    await session.withTransaction(async () => {
+      authDoc = await authDB.create(
+        [
+          {
+            email,
+            username,
+            password,
+            phone,
+            isActive: true,
+            emailVerificationToken,
+            verifcationTokenExpiresAt,
+          },
+        ],
+        { session }
+      );
+      authDoc = authDoc[0];
+
+      userDoc = await userDB.create([{ authId: authDoc.id, profile }], {
+        session,
+      });
+      userDoc = userDoc[0];
+    });
+    return { auth: authDoc, user: userDoc };
+  } finally {
+    session.endSession();
   }
-};
+}
 
-authSchema.methods.changePasswordAfter = function (JWTTimestamp) {
-  if (this.passwordChangedAt) {
-    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000);
-    return JWTTimestamp < changedTimestamp;
+async function findUserById(id) {
+  return authDB.findById(id);
+}
+
+async function findUserByEmailOrUsername(
+  email = null,
+  username = null,
+  extraFilters = {}
+) {
+  if (!email && !username) {
+    throw new Error('Must provide either an email or a username');
   }
-  return false;
+  const idFilter = email ? { email } : { username };
+  return authDB.findOne({ ...idFilter, ...extraFilters });
+}
+
+async function findUserByEmailOrPhone(
+  email = null,
+  phone = null,
+  extraFilters = {}
+) {
+  if (!email && !phone) {
+    throw new Error('Must provide either an email or a phone number');
+  }
+  const idFilter = email ? { email } : { phone };
+  return authDB.findOne({ ...idFilter, ...extraFilters });
+}
+
+async function updateUserRole(id, role) {
+  authDB.findByIdAndUpdate(id, { role }, { new: true, runValidators: true });
+}
+
+async function deactivateAuthId(id, options = {}) {
+  await authDB.findOneAndUpdate(
+    { _id: id },
+    { isActive: false },
+    { new: true, session: options.session }
+  );
+}
+
+async function findByVerificationToken(token) {
+  return authDB.findOne({
+    emailVerificationToken: token,
+    verifcationTokenExpiresAt: { $gt: Date.now() },
+  });
+}
+
+async function findByPasswordResetToken(token) {
+  return authDB.findOne({
+    passwordResetToken: token,
+    passwordResetExpiresAt: { $gt: Date.now() },
+  });
+}
+
+module.exports = {
+  registerUser,
+  findUserById,
+  updateUserRole,
+  deactivateAuthId,
+  findUserByEmailOrPhone,
+  findUserByEmailOrUsername,
+  findByVerificationToken,
+  findByPasswordResetToken,
 };
-
-authSchema.methods.createPasswordResetToken = function () {
-  const resetToken = crypto.randomBytes(32).toString('hex');
-
-  this.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-
-  this.passwordResetExpiresAt = Date.now() + 10 * 60 * 1000;
-
-  return resetToken;
-};
-
-authSchema.index({ username: 'text' });
-
-module.exports = mongoose.model('Auth', authSchema);

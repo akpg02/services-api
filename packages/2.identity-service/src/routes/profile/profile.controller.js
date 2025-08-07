@@ -1,4 +1,4 @@
-const User = require('../../models/user.model');
+const { findUserWithAuthId } = require('../../models/user.model');
 const { logger } = require('@gaeservices/common');
 
 exports.profile = async (req, res) => {
@@ -14,12 +14,8 @@ exports.profile = async (req, res) => {
     }
 
     // Use the auth ID (from req.user.authId provided by the authentication middleware)
-    const profile = await User.findOne({ authId: userId }).populate({
-      path: 'authId',
-      select: req.params.id
-        ? '-password -emailVerificationToken -isActive -lastActiveAt -emailVerified -passwordResetExpires'
-        : '-password -role -emailVerificationToken -isActive -lastActiveAt -emailVerified -passwordResetExpires',
-    });
+    const includeRole = false;
+    const profile = await findUserWithAuthId(userId, { includeRole });
     if (!profile) {
       return res
         .status(404)

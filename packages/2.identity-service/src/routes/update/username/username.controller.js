@@ -1,6 +1,6 @@
 const Queue = require('bull');
-const Auth = require('../../../models/auth.model');
-const RefreshToken = require('../../../models/token.model');
+const { findUserByEmailOrUsername, findUserById } = require('../../../models/auth.model');
+const { deleteAllUserTokens } = require('../../../models/token.model');
 const { changeUsernameSchema } = require('../../../schemes/username');
 const { logger, publishEvent } = require('@gaeservices/common');
 
@@ -19,7 +19,7 @@ exports.username = async (req, res) => {
     const { newUsername, currentPassword } = req.body;
 
     // Find the currently authenticated user by ID (provided by the protect middleware)
-    const user = await Auth.findById(req.user.id);
+    const user = await findUserById(req.user.id);
     if (!user) {
       return res
         .status(404)
@@ -35,7 +35,7 @@ exports.username = async (req, res) => {
     }
 
     // check if username is already taken
-    const existingUser = await Auth.findOne({ newUsername });
+    const existingUser = await findUserByEmailOrUsername(newUsername);
     if (existingUser && existingUser._id.toString() !== req.user.id) {
       return res.status(400).json({
         success: false,
@@ -46,7 +46,7 @@ exports.username = async (req, res) => {
     user.username = newUsername;
     await user.save();
 
-    await RefreshToken.deleteMany({ user: req.user.id });
+    await deleteAllUserTokens(req.user.id);
 
     await emailQueue.add('sendUsernameChangeConfirmation', {
       email: user.email,

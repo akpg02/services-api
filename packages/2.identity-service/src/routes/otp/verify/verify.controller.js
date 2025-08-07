@@ -1,4 +1,4 @@
-const Auth = require('../../../models/auth.model');
+const { findUserByEmailOrPhone } = require('../../../models/auth.model');
 const { logger } = require('@gaeservices/common');
 const { verifyOTPScheme } = require('../../../schemes/otp');
 
@@ -13,8 +13,7 @@ exports.verifyOTP = async (req, res) => {
     }
     const { email, phone, otp } = value;
 
-    const user = await Auth.findOne({
-      ...(email ? { email } : { phone }),
+    const user = await findUserByEmailOrPhone(email, phone, {
       otp,
       otpExpires: { $gt: Date.now() },
     });

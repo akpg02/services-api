@@ -1,5 +1,5 @@
-const User = require('../../models/user.model');
-const RefreshToken = require('../../models/token.model');
+const { updateUser } = require('../../models/user.model');
+const { fetchToken, deleteToken } = require('../../models/token.model');
 const { logger, publishEvent, isEmail } = require('@gaeservices/common');
 const { loginSchema } = require('../../schemes/login');
 const { generateTokens } = require('../../utils/generate-token');
@@ -9,13 +9,13 @@ const {
 } = require('../../services/auth.service');
 
 exports.login = async (req, res) => {
-  logger.info('Login endpoint');
+  logger.info('POST /auth/login');
   const cookies = req.cookies;
   try {
     const { value, error } = loginSchema(req.body);
     if (error) {
       logger.warn(
-        'Validation error',
+        'Login Validation failed',
         error.details.map((d) => d.message)
       );
       return res
@@ -24,13 +24,13 @@ exports.login = async (req, res) => {
     }
 
     const { username, password } = value;
-    const isValidEmail = isEmail(username);
-    const user = !isValidEmail
-      ? await getUserByUsername(username)
-      : await getUserByEmail(username);
 
+    const lookup = isEmail(username)
+      ? await getUserByEmail(username)
+      : await getUserByUsername(username);
+    const user = await lookup(username);
     if (!user) {
-      logger.warn('Username and/or password is incorrect');
+      logger.warn('User not found during login');
       return res.status(400).json({
         success: false,
         message: 'Username and/or password is incorrect',
@@ -40,7 +40,7 @@ exports.login = async (req, res) => {
     // valid password?
     const isValidPassword = await user.comparePassword(password);
     if (!isValidPassword) {
-      logger.warn('Invalid password');
+      logger.warn('Invalid password attempt');
       return res.status(400).json({
         success: false,
         message: 'Username and/or password is incorrect',
@@ -56,23 +56,17 @@ exports.login = async (req, res) => {
     }
 
     // Update User model
-    await User.findOneAndUpdate(
-      { authId: user._id },
-      { isActive: true, lastActiveAt: new Date() },
-      { new: true }
-    );
+    await updateUser(user._id, { isActive: true, lastActiveAt: new Date() });
 
     // Generate tokens only afer all validations and updates have succeeded
     const { accessToken } = await generateTokens(res, user);
 
     // check if refreshToken exists in the cookies of the user
-    const existingToken = await RefreshToken.findOne({
-      token: cookies?.refreshToken,
-    });
+    const existingToken = await fetchToken(cookies?.refreshToken);
 
     // if it does, delete the old cookie
     if (existingToken) {
-      await RefreshToken.deleteOne({ token: existingToken.token });
+      await deleteToken(existingToken.token);
     }
 
     // TODO: publish event?

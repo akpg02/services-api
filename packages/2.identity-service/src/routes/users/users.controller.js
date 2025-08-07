@@ -1,4 +1,4 @@
-const User = require('../../models/user.model');
+const { fetchUserById, fetchAllUsers } = require('../../models/user.model');
 const mongoose = require('mongoose');
 const { ApiFeatures, logger } = require('@gaeservices/common');
 
@@ -15,11 +15,7 @@ exports.all = async (req, res) => {
           .json({ success: false, message: 'Invalid user ID' });
       }
       // 2) Fetch by ID + populate
-      const user = await User.findById(id).populate({
-        path: 'authId',
-        match: { isActive: true },
-        select: '-password -emailVerificationToken -passwordResetToken -__v',
-      });
+      const user = await fetchUserById(id);
 
       // 3) Not found?
       if (!user) {
@@ -45,17 +41,18 @@ exports.all = async (req, res) => {
       return res.json(JSON.parse(cached));
     }
 
-    const features = new ApiFeatures(User.find({}), req.query)
+    const features = new ApiFeatures(fetchAllUsers(), req.query)
       .filter()
       .sort()
       .limitFields()
-      .paginate();
+      .paginate()
+      .populate({
+        path: 'authId',
+        match: { isActive: true }, // only fetch users with an active account
+        select: '-password -emailVerificationToken -passwordResetToken -__v',
+      });
 
-    let users = await features.query.populate({
-      path: 'authId',
-      match: { isActive: true }, // only fetch users with an active account
-      select: '-password -emailVerificationToken -passwordResetToken -__v',
-    });
+    let users = await features.query;
 
     const result = { count: users.length, data: users };
 
