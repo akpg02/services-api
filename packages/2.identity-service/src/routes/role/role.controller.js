@@ -1,4 +1,4 @@
-const Auth = require('../../models/auth.model');
+const { updateUserRole } = require('../../models/auth.model');
 const { updateUserRoleSchema } = require('../../schemes/role');
 const { logger, publishEvent } = require('@gaeservices/common');
 
@@ -16,13 +16,7 @@ exports.role = async (req, res) => {
         .json({ success: false, message: error.details.map((d) => d.message) });
     }
     // find and update the user role
-    const user = await Auth.findByIdAndUpdate(
-      req.params.id,
-      {
-        role: req.body.role,
-      },
-      { new: true, runValidators: true }
-    );
+    const user = await updateUserRole(req.params.id, req.body.role);
     if (!user) {
       logger.warn('User not found');
       return res.status(400).json({

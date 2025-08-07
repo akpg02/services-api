@@ -25,7 +25,7 @@
     "nodemon": "^3.1.9"
   },
   "dependencies": {
-    "@gaeservices/common": "^1.0.9",
+    "@gaeservices/common": "^1.1.0",
     "amqplib": "^0.10.7",
     "argon2": "^0.41.1",
     "bull": "^4.16.5",

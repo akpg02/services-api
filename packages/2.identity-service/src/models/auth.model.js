@@ -71,6 +71,10 @@ async function findUserByEmailOrPhone(
   return authDB.findOne({ ...idFilter, ...extraFilters });
 }
 
+async function updateUserRole(id, role) {
+  authDB.findByIdAndUpdate(id, { role }, { new: true, runValidators: true });
+}
+
 async function deactivateAuthId(id, options = {}) {
   await authDB.findOneAndUpdate(
     { _id: id },
@@ -96,6 +100,7 @@ async function findByPasswordResetToken(token) {
 module.exports = {
   registerUser,
   findUserById,
+  updateUserRole,
   deactivateAuthId,
   findUserByEmailOrPhone,
   findUserByEmailOrUsername,

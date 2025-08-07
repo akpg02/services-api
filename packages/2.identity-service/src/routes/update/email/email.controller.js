@@ -1,6 +1,9 @@
 const Queue = require('bull');
-const Auth = require('../../../models/auth.model');
-const RefreshToken = require('../../../models/token.model');
+const {
+  findUserById,
+  findUserByEmailOrUsername,
+} = require('../../../models/auth.model');
+const { deleteAllUserTokens } = require('../../../models/token.model');
 const { changeEmailSchema } = require('../../../schemes/email');
 const { logger, publishEvent } = require('@gaeservices/common');
 const { generateVerificationCode } = require('../../../utils/generate-token');
@@ -20,7 +23,7 @@ exports.email = async (req, res) => {
     }
 
     const { newEmail, currentPassword } = req.body;
-    const auth = await Auth.findById(req.user.id);
+    const auth = await findUserById(req.user.id);
     if (!auth) {
       logger.warn('User not found');
       return res.status(400).json({
@@ -38,7 +41,7 @@ exports.email = async (req, res) => {
     }
 
     // check if email is already taken
-    const existingUser = await Auth.findOne({ newEmail });
+    const existingUser = await findUserByEmailOrUsername(newEmail);
     if (existingUser && existingUser._id.toString() !== req.user.id) {
       return res.status(400).json({
         success: false,
@@ -62,7 +65,7 @@ exports.email = async (req, res) => {
     // save everything
     await auth.save();
     await invalidateIdentityCache(req, auth._id.toString());
-    await RefreshToken.deleteMany({ user: req.user.id });
+    await deleteAllUserTokens(req.user.id);
 
     await emailQueue.add('sendEmailChangeSuccessConfirmation', {
       email: newEmail,
