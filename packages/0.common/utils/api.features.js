@@ -60,6 +60,10 @@ class ApiFeatures {
 
     return this;
   }
+  populate(populateOptions) {
+    this.query = this.query.populate(populateOptions);
+    return this;
+  }
 }
 
 module.exports = ApiFeatures;

@@ -19,7 +19,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@gaeservices/common": "^1.0.9",
+    "@gaeservices/common": "^1.1.0",
     "amqplib": "^0.10.8",
     "axios": "^1.11.0",
     "chalk": "^4.1.2",
