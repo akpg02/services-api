@@ -1,7 +1,9 @@
 const Queue = require('bull');
-const Auth = require('../../models/auth.model');
-const User = require('../../models/user.model');
 const { registerSchema } = require('../../schemes/register');
+const {
+  findUserByEmailOrUsername,
+  registerUser,
+} = require('../../models/auth.model');
 const {
   publishEvent,
   logger,
@@ -15,7 +17,7 @@ const {
 const emailQueue = new Queue('emailQueue');
 
 exports.register = async (req, res) => {
-  logger.info('Registration endpoint');
+  logger.info('POST /auth/register');
   try {
     // validate schema
     const { value, error } = registerSchema(req.body);
@@ -35,7 +37,7 @@ exports.register = async (req, res) => {
       bio,
     } = value;
 
-    let existing = await Auth.findOne({ $or: [{ email }, { username }] });
+    let existing = await findUserByEmailOrUsername(email, username);
     if (existing) {
       logger.warn('User already exists');
       return res
@@ -43,43 +45,18 @@ exports.register = async (req, res) => {
         .json({ success: false, message: 'User already exists' });
     }
     // Create email verification token
-    // const randomBytes = await Promise.resolve(crypto.randomBytes(20));
-    // const randomCharacters = randomBytes.toString('hex');
     const emailVerificationToken = generateVerificationCode();
 
-    // Create Auth entry inside the transaction
-    const authUser = await Auth.create({
+    // Create user in User DB and Auth DB
+    const { user } = await registerUser({
       email,
       username,
       password,
       phone,
-      isActive: true,
+      profile: { firstname, lastname, avatar, bio },
       emailVerificationToken,
-      verifcationTokenExpiresAt: Date.now() + 1 * 60 * 60 * 1000,
+      verifcationTokenExpiresAt,
     });
-
-    logger.warn('Auth user saved', authUser._id);
-
-    // Create User Profile entry inside the transaction
-    let user;
-    try {
-      user = await User.create({
-        authId: authUser.id,
-        profile: {
-          firstname,
-          lastname,
-          avatar,
-          bio,
-        },
-      });
-      logger.warn('User profile saved', user._id);
-    } catch (error) {
-      logger.error('User creation failed, rolling back Auth', error);
-      // delete the orphaned Auth doc
-      await Auth.deleteOne({ _id: authUser.id });
-      // rethrow so outer handles the response
-      throw error;
-    }
 
     await invalidateCache(req.redisClient, 'gateway', user._id.toString());
 

@@ -1,4 +1,4 @@
-const Auth = require('../../../models/auth.model');
+const { findUserByEmailOrPhone } = require('../../../models/auth.model');
 const Queue = require('bull');
 const { logger, publishEvent } = require('@gaeservices/common');
 const { forgotPasswordSchema } = require('../../../schemes/password');
@@ -19,7 +19,7 @@ exports.forgotPassword = async (req, res) => {
         .json({ success: false, message: error.details.map((d) => d.message) });
     }
     const { email } = value;
-    const auth = await Auth.findOne({ email });
+    const auth = await findUserByEmailOrPhone(email);
     if (!auth) {
       return res.status(400).json({ success: false, message: 'Invalid email' });
     }

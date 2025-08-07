@@ -1,4 +1,4 @@
-const RefreshToken = require('../../models/token.model');
+const { fetchToken, deleteToken } = require('../../models/token.model');
 const { logger } = require('@gaeservices/common');
 
 exports.logout = async (req, res) => {
@@ -10,7 +10,7 @@ exports.logout = async (req, res) => {
 
     const refreshToken = cookies.refreshToken;
 
-    const storedToken = await RefreshToken.findOne({ token: refreshToken });
+    const storedToken = await fetchToken(refreshToken);
     if (!storedToken || storedToken.expiresAt < new Date()) {
       res.clearCookie('refreshToken', {
         httpOnly: true,
@@ -20,7 +20,7 @@ exports.logout = async (req, res) => {
       return res.sendStatus(204);
     }
 
-    await RefreshToken.deleteOne({ token: refreshToken });
+    await deleteToken(refreshToken);
     logger.info('Refresh token deleted for logout');
 
     res.clearCookie('refreshToken', {

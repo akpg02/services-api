@@ -1,4 +1,4 @@
-const Auth = require('../../models/auth.model');
+const { findByVerificationToken } = require('../../models/auth.model');
 const Queue = require('bull');
 const { logger, publishEvent } = require('@gaeservices/common');
 const { verifyEmailSchema } = require('../../schemes/email');
@@ -22,10 +22,7 @@ exports.verifyEmail = async (req, res) => {
 
     const { code } = req.body;
 
-    const auth = await Auth.findOne({
-      emailVerificationToken: code,
-      verifcationTokenExpiresAt: { $gt: Date.now() },
-    });
+    const auth = await findByVerificationToken(code);
 
     if (!auth) {
       return res.status(400).json({

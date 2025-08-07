@@ -5,13 +5,9 @@ const { protect, restrictTo } = require('../../middlewares/index.middleware');
 const deactivateRouter = express.Router();
 
 deactivateRouter.use(protect);
-deactivateRouter
-  .route('/deactivate-account')
-  .put(deactivateController.deactivate);
+deactivateRouter.route('/deactivate').put(deactivateController.deactivate);
 
 deactivateRouter.use(restrictTo('admin'));
-deactivateRouter
-  .route('/:id/deactivate-user')
-  .put(deactivateController.deactivate);
+deactivateRouter.route('/:id/deactivate').put(deactivateController.deactivate);
 
 module.exports = deactivateRouter;

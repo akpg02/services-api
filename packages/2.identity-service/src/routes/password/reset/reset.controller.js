@@ -1,5 +1,5 @@
-const Auth = require('../../../models/auth.model');
-const RefreshToken = require('../../../models/token.model');
+const { findByPasswordResetToken } = require('../../../models/auth.model');
+const { deleteAllUserTokens } = require('../../../models/token.model');
 const crypto = require('crypto');
 const Queue = require('bull');
 const { logger } = require('@gaeservices/common');
@@ -25,10 +25,7 @@ exports.resetPassword = async (req, res) => {
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-    const auth = await Auth.findOne({
-      passwordResetToken: hashedToken,
-      passwordResetExpiresAt: { $gt: Date.now() },
-    });
+    const auth = await findByPasswordResetToken(hashedToken);
 
     if (!auth) {
       return res
@@ -50,7 +47,7 @@ exports.resetPassword = async (req, res) => {
     await auth.save();
 
     // Revoke all old refresh-tokens for this user
-    await RefreshToken.deleteMany({ user: auth._id });
+    await deleteAllUserTokens(auth._id);
 
     // Clear any lingering cookie on client side
     res.clearCookie('refreshToken');
