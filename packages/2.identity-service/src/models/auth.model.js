@@ -47,6 +47,13 @@ async function findUserById(id) {
   return authDB.findById(id);
 }
 
+async function fetchInactiveUsers(thresholdDate) {
+  return authDB.find({
+    lastActiveAt: { $lt: thresholdDate },
+    isActive: false,
+  });
+}
+
 async function findUserByEmailOrUsername(
   email = null,
   username = null,
@@ -106,4 +113,5 @@ module.exports = {
   findUserByEmailOrUsername,
   findByVerificationToken,
   findByPasswordResetToken,
+  fetchInactiveUsers,
 };

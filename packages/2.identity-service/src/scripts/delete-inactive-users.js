@@ -10,10 +10,7 @@ const deleteInactiveUsers = async () => {
   const thresholdDate = new Date(Date.now() - INACTIVITY_LIMIT);
 
   // Find inactive users
-  const inactiveUsers = await Auth.find({
-    lastActiveAt: { $lt: thresholdDate },
-    isActive: false,
-  });
+  const inactiveUsers = await Auth.fetchInactiveUsers(thresholdDate);
 
   for (const user of inactiveUsers) {
     console.log(`Deleting inactive user: ${user.username}`);
