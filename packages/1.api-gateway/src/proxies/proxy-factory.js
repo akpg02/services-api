@@ -12,15 +12,17 @@ function createProxy(service, options) {
     parseReqBody: service.isMultipart ? false : true,
 
     proxyReqPathResolver: (req) => {
-      const isHealthCheck = /\/(health|status|ping|ready)/.test(req.path);
+      const isHealth = /\/(health|status|ping|ready)/.test(req.path);
 
-      // ✅ Only apply the rewrite to non-health routes
-      const resolvedPath = isHealthCheck
-        ? req.originalUrl.replace(/^\/v1\/[^/]+/, '') || '/' // strip "/v1/auth"
-        : req.originalUrl.replace(/^\/v1/, '/api');
+      if (isHealth) {
+        const stripped = req.originalUrl.replace(/^\/v\d+\/[^/]+/, '');
+        logger.info(`Proxy [health] ${service.name}: ${stripped}`);
+        return stripped || '/';
+      }
 
-      logger.info(`Proxying request to ${service.name}: ${resolvedPath}`);
-      return resolvedPath;
+      // Pass through unchanged for normal routes:
+      logger.info(`Proxy ${service.name}: ${req.originalUrl}`);
+      return req.originalUrl;
     },
 
     proxyReqOptDecorator: (proxyReqOpts, req) => {
@@ -28,13 +30,13 @@ function createProxy(service, options) {
       proxyReqOpts.headers['x-user-role'] = JSON.stringify(
         req.user?.role || ''
       );
-      if (!service.isMultipart) {
+      if (!service.isMultipart)
         proxyReqOpts.headers['Content-Type'] = 'application/json';
-      }
+
       return proxyReqOpts;
     },
 
-    userResDecorator: (proxyRes, proxyResData, _userReq, _userRes) => {
+    userResDecorator: (proxyRes, proxyResData) => {
       logger?.info(
         `Response from ${service.name} service: ${proxyRes.statusCode}`
       );
@@ -42,10 +44,7 @@ function createProxy(service, options) {
     },
   });
 
-  middlewareStack.push((req, res, next) => {
-    return proxyHandler(req, res, next);
-  });
-
+  middlewareStack.push((req, res, next) => proxyHandler(req, res, next));
   return { paths: service.paths, handler: middlewareStack };
 }
 

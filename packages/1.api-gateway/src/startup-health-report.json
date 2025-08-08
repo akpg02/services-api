@@ -10,8 +10,8 @@
     "name": "Identity",
     "baseUrl": "http://localhost:8001",
     "url": "http://localhost:8001/health",
-    "status": "UP",
-    "httpStatus": 200
+    "status": "DOWN",
+    "error": ""
   },
   {
     "name": "Product",
