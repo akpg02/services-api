@@ -6,9 +6,9 @@ const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
-const healthRoutes = require('./routes/health/health.router');
-const docsRoutes = require('./routes/docs/docs.router');
-const routes = require('./routes/index.router');
+const healthRoutes = require('./routes/v1/health/health.router');
+const docsRoutes = require('./routes/v1/docs/docs.router');
+const routes = require('./routes/v1/index.router');
 const { sanitize } = mongoSanitize;
 const { xss } = require('express-xss-sanitizer');
 const { RedisStore } = require('rate-limit-redis');
@@ -122,7 +122,7 @@ const sensitiveEnpointRateLimit = rateLimit({
 });
 
 // apply this sensitive enpoints limiter
-app.use('/api/auth/register', sensitiveEnpointRateLimit);
+app.use('/api/v1/auth/register', sensitiveEnpointRateLimit);
 
 app.use(
   '/docs/openapi',
@@ -137,7 +137,7 @@ app.use('/', healthRoutes);
 
 // Routes
 app.use(
-  '/api/',
+  '/api/v1',
   (req, _res, next) => {
     req.redisClient = redisClient;
     next();

@@ -1,13 +1,16 @@
-const versions = ['v1', 'v2'];
+const versions = ['v1']; // later ['v1', 'v2']
 
-function expandPaths(base, version) {
-  return version.map((v) => `${v}/${base}`);
+function expandPaths(basePaths, versions) {
+  const list = Array.isArray(basePaths) ? basePaths : [basePaths];
+  return list.flatMap((p) =>
+    versions.map((v) => `/${v}/${p.replace(/^\/+/, '')}`)
+  );
 }
 
 module.exports = [
   {
     name: 'auth',
-    basePath: 'auth',
+    basePath: ['auth'],
     versions,
     target: process.env.IDENTITY_SERVICE_URL,
     secure: false,
@@ -15,7 +18,7 @@ module.exports = [
   },
   {
     name: 'users',
-    basePath: 'users',
+    basePath: ['users'],
     versions,
     target: process.env.IDENTITY_SERVICE_URL,
     secure: true,
@@ -29,21 +32,21 @@ module.exports = [
   },
   {
     name: 'reviews',
-    basePath: 'reviews',
+    basePath: ['reviews'],
     versions,
     target: process.env.REVIEW_SERVICE_URL,
     secure: true,
   },
   {
     name: 'inventory',
-    basePath: 'inventory',
+    basePath: ['inventory'],
     versions,
     target: process.env.INVENTORY_SERVICE_URL,
     secure: true,
   },
   {
     name: 'media',
-    basePath: 'media',
+    basePath: ['media'],
     versions,
     target: process.env.MEDIA_SERVICE_URL,
     secure: true,
@@ -51,14 +54,14 @@ module.exports = [
   },
   {
     name: 'auditlogs',
-    basePath: 'auditlogs',
+    basePath: ['auditlogs'],
     versions,
     target: process.env.AUDIT_LOG_SERVICE_URL,
     secure: true,
   },
   {
     name: 'carts',
-    basePath: 'carts',
+    basePath: ['carts'],
     versions,
     target: process.env.CART_SERVICE_URL,
     secure: true,
@@ -72,14 +75,14 @@ module.exports = [
   },
   {
     name: 'payments',
-    basePath: 'payments',
+    basePath: ['payments'],
     versions,
     target: process.env.PAYMENT_SERVICE_URL,
     secure: true,
   },
   {
     name: 'shipments',
-    basePath: 'shipments',
+    basePath: ['shipments'],
     versions,
     target: process.env.SHIPMENT_SERVICE_URL,
     secure: true,
@@ -93,19 +96,20 @@ module.exports = [
   },
   {
     name: 'analytics',
-    basePath: 'analytics',
+    basePath: ['analytics'],
     versions,
     target: process.env.ANALYTICS_SERVICE_URL,
     secure: true,
   },
   {
     name: 'promotions',
-    basePath: 'promotions',
+    basePath: ['promotions'],
     versions,
     target: process.env.PROMOTION_SERVICE_URL,
     secure: true,
   },
 ].map((svc) => ({
   ...svc,
-  paths: expandPaths(svc.basePath, svc.versions || ['v1']),
+  versions: svc.versions || versions,
+  paths: expandPaths(svc.basePath, svc.versions || versions),
 }));

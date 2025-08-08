@@ -11,9 +11,9 @@
     "cluster": "pm2 start src/server.js -i max",
     "worker": "node src/workers/email-processor.js",
     "lint": "redocly lint src/docs/openapi/bundled.yaml",
-    "build:redoc": "npx redocly build-docs src/docs/openapi/index.yaml -o src/docs/redoc/index.html",
-    "bundle:openapi": "swagger-cli bundle src/docs/openapi/index.yaml --outfile src/docs/openapi/bundled.yaml --type yaml",
-    "dev:docs": "concurrently \"npm run build:redoc\" \"npm run bundle:openapi\""
+    "build:redoc:v1": "npx redocly build-docs src/docs/openapi/v1/index.yaml -o src/docs/redoc/v1/index.html",
+    "bundle:openapi:v1": "swagger-cli bundle src/docs/openapi/v1/index.yaml --outfile src/docs/openapi/v1/bundled.yaml --type yaml",
+    "dev:docs": "concurrently \"npm run build:redoc:v1\" \"npm run bundle:openapi:v1\""
   },
   "keywords": [],
   "author": "",

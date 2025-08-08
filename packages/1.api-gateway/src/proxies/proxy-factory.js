@@ -16,12 +16,12 @@ function createProxy(service, options) {
 
       if (isHealth) {
         const stripped = req.originalUrl.replace(/^\/v\d+\/[^/]+/, '');
-        logger.info(`Proxy [health] ${service.name}: ${stripped}`);
+        logger.info(`Proxy [health] ${service.name} -> ${stripped || '/'}`);
         return stripped || '/';
       }
 
       // Pass through unchanged for normal routes:
-      logger.info(`Proxy ${service.name}: ${req.originalUrl}`);
+      logger.info(`Proxy ${service.name} -> ${req.originalUrl}`);
       return req.originalUrl;
     },
 
