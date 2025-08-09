@@ -4,15 +4,15 @@
   "description": "API Gateway Microservice",
   "main": "src/server.js",
   "scripts": {
-    "test": "NODE_ENV=test jest --runInBand --detectOpenHandles --watchAll",
+    "test": "NODE_ENV=test jest --runInBand --detectOpenHandles",
     "watch": "nodemon src/server.js",
     "start": "node src/server.js",
     "cluster": "pm2 start src/server.js -i max",
-    "lint:redoc": "npx redocly lint src/docs/openapi/index.yaml",
-    "bundle:openapi": "swagger-cli bundle src/docs/openapi/index.yaml --outfile src/docs/openapi/bundled.yaml --type yaml",
-    "build:redoc": "npx @redocly/cli build-docs src/docs/openapi/bundled.yaml -o src/docs/redoc/index.html",
-    "dev:docs": "npm run bundle:openapi && npm run build:redoc",
-    "bundle:identity": "swagger-cli bundle ../2.identity-service/src/docs/openapi/index.yaml --outfile src/docs/openapi/services/identity/index.yaml --type yaml"
+    "lint:redoc": "npx redocly lint src/docs/v1/openapi/index.yaml",
+    "bundle:openapi:v1": "swagger-cli bundle src/docs/openapi/v1/index.yaml --outfile src/docs/openapi/v1/bundled.yaml --type yaml",
+    "build:redoc:v1": "npx @redocly/cli build-docs src/docs/openapi/v1/bundled.yaml -o src/docs/redoc/v1/index.html",
+    "bundle:identity:v1": "swagger-cli bundle ../2.identity-service/src/docs/openapi/v1/index.yaml --outfile src/docs/openapi/v1/services/identity/index.yaml --type yaml",
+    "dev:docs": "npm run bundle:openapi:v1 && npm run build:redoc:v1"
   },
   "keywords": [],
   "author": "",

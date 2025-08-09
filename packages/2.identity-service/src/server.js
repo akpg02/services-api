@@ -11,19 +11,19 @@ process.on('uncaughtException', (reason, promise) => {
   logger.error('Uncaught Exception at', promise, 'reason', reason);
 });
 
-// connect to DB
-connectToDB();
-
-// start inactivity cleanup task
-deleteInactiveUsers();
-
 const PORT = process.env.PORT || 8001;
 
 let server = null;
 
 async function startServer() {
-  // Start http servcer
   try {
+    // connect to DB
+    connectToDB();
+
+    // start inactivity cleanup task
+    deleteInactiveUsers();
+
+    // Start http servcer
     server = http.createServer(app);
     server.listen(PORT, () => {
       logger.info(`Identity service running on port ${PORT}`);

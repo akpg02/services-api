@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
-const docsRoutes = require('./routes/docs/docs.router');
+const routes = require('./routes/index.router');
 const { xss } = require('express-xss-sanitizer');
 const { rateLimit } = require('express-rate-limit');
 const { RedisStore } = require('rate-limit-redis');
@@ -16,7 +16,6 @@ const {
   credentials,
 } = require('@gaeservices/common');
 const setupProxies = require('./proxies/index.proxies');
-const routes = require('./routes/index.router');
 
 const app = express();
 const redisClient = new Redis(process.env.REDIS_URL);
@@ -42,7 +41,7 @@ app.use(
       ],
       workerSrc: ["'self'", 'blob:'],
       childSrc: ["'self'", 'blob:'],
-      connectSrc: ["'self'", 'blob:'],
+      connectSrc: ["'self'", 'blob:', 'https://cdn.redocly.com'],
     },
   })
 );
@@ -76,7 +75,7 @@ app.use(
 );
 
 // Request logging
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   logger.info(`→ ${req.method} ${req.url}`);
   logger.info(`Body: ${JSON.stringify(req.body)}`);
   next();
@@ -85,12 +84,11 @@ app.use((req, res, next) => {
 // Proxy setup
 setupProxies(app);
 
+// Serve all versions: /docs/openapi/v1/*, /docs/openapi/v2/*
 app.use(
   '/docs/openapi',
   express.static(path.join(__dirname, 'docs', 'openapi'))
 );
-
-app.use('/docs', docsRoutes);
 
 // Application routes
 app.use('/', routes);
