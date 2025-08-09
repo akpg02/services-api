@@ -4,7 +4,7 @@
   "description": "API Gateway Microservice",
   "main": "src/server.js",
   "scripts": {
-    "test": "NODE_ENV=test jest --runInBand --detectOpenHandles --watchAll",
+    "test": "NODE_ENV=test jest --runInBand --detectOpenHandles",
     "watch": "nodemon src/server.js",
     "start": "node src/server.js",
     "cluster": "pm2 start src/server.js -i max",
