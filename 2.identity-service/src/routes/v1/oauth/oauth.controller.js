@@ -72,7 +72,7 @@ exports.oauthLogin = async (req, res) => {
     // Upsert/link to your Auth + User models
     const { auth } = await upsertOAuthUser(normalized);
 
-    // Issue cookies (refresh + access) — do not echo tokens if you're cookie-only
+    // Issue cookies (refresh + access)
     await generateTokens(res, auth);
 
     return res

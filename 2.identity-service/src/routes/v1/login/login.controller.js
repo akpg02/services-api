@@ -7,27 +7,22 @@ const {
   getUserByEmail,
   getUserByUsername,
 } = require('../../../services/auth.service');
+const { issueLoginOTP } = require('../../../services/otp.service');
 
 exports.login = async (req, res) => {
   logger.info('POST /auth/login');
-  const cookies = req.cookies;
   try {
     const { value, error } = loginSchema(req.body);
     if (error) {
-      logger.warn(
-        'Login Validation failed',
-        error.details.map((d) => d.message)
-      );
-      return res
-        .status(400)
-        .json({ success: false, message: error.details.map((d) => d.message) });
+      const messages = error.details.map((d) => d.message);
+      logger.warn('Login Validation failed', messages);
+      return res.status(400).json({ success: false, message: messages });
     }
 
     const { username, password } = value;
 
-    const user = isEmail(username)
-      ? await getUserByEmail(username)
-      : await getUserByUsername(username);
+    const lookup = isEmail(username) ? getUserByEmail : getUserByUsername;
+    const user = await lookup(username);
 
     if (!user) {
       logger.warn('User not found during login');
@@ -38,8 +33,8 @@ exports.login = async (req, res) => {
     }
 
     // valid password?
-    const isValidPassword = await user.comparePassword(password);
-    if (!isValidPassword) {
+    const ok = await user.comparePassword(password);
+    if (!ok) {
       logger.warn('Invalid password attempt');
       return res.status(400).json({
         success: false,
@@ -52,26 +47,22 @@ exports.login = async (req, res) => {
       user.isActive = true;
       // update last activity timestamp
       user.lastActiveAt = new Date();
-      await user.save();
+      await user.save({ validateModifiedOnly: true });
     }
-
     // Update User model
     await updateUser(user._id, { isActive: true, lastActiveAt: new Date() });
 
-    // Generate tokens only afer all validations and updates have succeeded
-    const { accessToken } = await generateTokens(res, user);
+    // OTP step
+    const via = user.phone ? 'sms' : 'email';
+    const sent = await issueLoginOTP(user, { via });
 
-    // check if refreshToken exists in the cookies of the user
-    const existingToken = await fetchToken(cookies?.refreshToken);
-
-    // if it does, delete the old cookie
-    if (existingToken) {
-      await deleteToken(existingToken.token);
-    }
-
-    // TODO: publish event?
-
-    return res.status(200).json({ accessToken });
+    return res.status(202).json({
+      success: true,
+      requiresOTP: true,
+      delivery: sent.via,
+      to: sent.destination,
+      hint: 'Submit OTP to /v1/auth/otp/verify to complete login',
+    });
   } catch (error) {
     logger.error('Login error occurred', error);
     res.status(500).json({ success: false, message: 'Internal server error' });

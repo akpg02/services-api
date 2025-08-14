@@ -1,6 +1,6 @@
-const { findUserByEmailOrPhone } = require('../../../../models/auth.model');
 const { logger } = require('@gaeservices/common');
 const { verifyOTPScheme } = require('../../../../schemes/otp');
+const { getUserForOTP, hashOTP } = require('../../../../utils/sms');
 
 exports.verifyOTP = async (req, res) => {
   logger.info('Verify OTP endpoint');
@@ -8,39 +8,34 @@ exports.verifyOTP = async (req, res) => {
     const { value, error } = verifyOTPScheme(req.body);
     if (error) {
       const messages = error.details.map((d) => d.message);
-      logger.warn('Validation error', messages);
+      logger.warn('OTP verify validation error', messages);
       return res.status(400).json({ success: false, message: messages });
     }
-    const { email, phone, otp } = value;
 
-    const user = await findUserByEmailOrPhone(email, phone, {
-      otp,
-      otpExpires: { $gt: Date.now() },
-    });
-
+    const user = await getUserForOTP(value);
     if (!user)
       return res
         .status(400)
         .json({ success: false, message: 'Invalid or expired OTP' });
 
+    // Compare hashed values
+    const candidate = hashOTP(value.otp, user._id);
+    const isExpired =
+      !user.otpExpires || new Date(user.otpExpires) < new Date();
+    const isMatch = user.otp && user.otp === candidate;
+
+    if (!isMatch || isExpired) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid or expired OTP' });
+    }
+
+    // clear OTP
     user.otp = undefined;
     user.otpExpires = undefined;
-    await user.save();
+    await user.save({ validateModifiedOnly: true });
 
-    const tempUser = {
-      email: user.email,
-      username: user.username,
-      role: user.role,
-    };
-
-    const { accessToken, refreshToken } = await generateTokens(res, tempUser);
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
-    });
+    const { accessToken } = await generateTokens(res, user);
 
     return res.status(200).json({ success: true, accessToken });
   } catch (error) {
