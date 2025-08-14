@@ -2,7 +2,7 @@
 
 A microservices api implemented using Node.js and Express. The api is initially composed of a gateway (entry point), identity-service and an audit-log service.
 
-There will additional services added in future development. RabbitMQ will allow for communication between microservices. Winston logger logs all necessary activity. 
+There will additional services added in future development. RabbitMQ will allow for communication between microservices. Winston logger logs all necessary activity.
 
 ## Getting Started
 
@@ -18,4 +18,4 @@ There will additional services added in future development. RabbitMQ will allow 
 
 ## Documentation
 
-Each microservice has both `/docs/swagger` and `/docs/redoc` endpoints that provide documentation for all its api endpoints.
+Each microservice has `/docs/swagger` and `/docs/redoc` endpoints that provide documentation for all its api endpoints.
