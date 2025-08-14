@@ -15,3 +15,7 @@ There will additional services added in future development. RabbitMQ will allow 
 ## CI/CD
 
 ## Docker
+
+## Documentation
+
+Each microservice has both `/docs/swagger` and `/docs/redoc` endpoints that provide documentation for all its api endpoints.
