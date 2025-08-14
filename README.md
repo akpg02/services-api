@@ -7,15 +7,18 @@ There will additional services added in future development. RabbitMQ will allow 
 ## Getting Started
 
 1. Ensure you have Node.js installed.
-2. Create necessary .env files. Note: a template of required environment variables will be made available.
-3. In a terminal, run: `npm install`.
+2. Create necessary .env files for each microservice. Note: a template of required environment variables will be made available.
 
 ## Running the Project
+
+All microservices and common files are contained in this repository. Refer to each microservice README file for further instructions.
+
+## Documentation
+
+Each microservice has `/docs/swagger` and `/docs/redoc` endpoints that provide documentation for all its api endpoints.
 
 ## CI/CD
 
 ## Docker
 
-## Documentation
-
-Each microservice has `/docs/swagger` and `/docs/redoc` endpoints that provide documentation for all its api endpoints.
+## Running the Tests
