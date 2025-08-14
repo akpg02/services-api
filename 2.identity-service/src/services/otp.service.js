@@ -1,6 +1,6 @@
 const Queue = require('bull');
-const { sendSMS, hashOTP, maskEmail, maskPhone } = require('../utils/sms');
-const { generateVerificationCode } = require('../utils/generate-token');
+const { sendSMS, hashOTP, maskEmail, maskPhone } = require('../utils/sms.utils');
+const { generateVerificationCode } = require('../utils/generate-token.utils');
 const { logger } = require('@gaeservices/common');
 
 const emailQueue = new Queue('emailQueue');

@@ -1,13 +1,13 @@
 const { updateUser } = require('../../../models/user.model');
-const { fetchToken, deleteToken } = require('../../../models/token.model');
 const { logger, publishEvent, isEmail } = require('@gaeservices/common');
 const { loginSchema } = require('../../../schemes/login');
-const { generateTokens } = require('../../../utils/generate-token');
 const {
   getUserByEmail,
   getUserByUsername,
 } = require('../../../services/auth.service');
 const { issueLoginOTP } = require('../../../services/otp.service');
+const { verifyTrustedDevice } = require('../../../utils/trusted-device.utils');
+const { generateTokens } = require('../../../utils/generate-token.utils');
 
 exports.login = async (req, res) => {
   logger.info('POST /auth/login');
@@ -20,10 +20,8 @@ exports.login = async (req, res) => {
     }
 
     const { username, password } = value;
-
     const lookup = isEmail(username) ? getUserByEmail : getUserByUsername;
     const user = await lookup(username);
-
     if (!user) {
       logger.warn('User not found during login');
       return res.status(400).json({
@@ -52,7 +50,16 @@ exports.login = async (req, res) => {
     // Update User model
     await updateUser(user._id, { isActive: true, lastActiveAt: new Date() });
 
-    // OTP step
+    // check for a valid trusted-devie cookie to skip OTP
+    const td = await verifyTrustedDevice(user._id, req);
+    if (td.ok) {
+      const { accessToken } = await generateTokens(res, user);
+      return res
+        .status(200)
+        .json({ success: true, accessToken, mfaSkipped: true });
+    }
+
+    // Otherwise, OTP step
     const via = user.phone ? 'sms' : 'email';
     const sent = await issueLoginOTP(user, { via });
 
