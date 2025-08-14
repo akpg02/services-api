@@ -72,6 +72,7 @@ const authSchema = new mongoose.Schema(
     },
   },
   {
+    timestamps: true,
     toJSON: {
       transform(_doc, ret) {
         ret.id = ret._id; // Add `id` field from `_id`
@@ -80,9 +81,25 @@ const authSchema = new mongoose.Schema(
         delete ret.password;
       },
     },
-    timestamps: true,
+    toObject: { virtuals: true },
   }
 );
+
+/**
+ * Virtual populate: pull trusted devices from the separate collection
+ * Usage:
+ *   Auth.findById(id).populate({
+ *     path: 'trustedDevices',
+ *     select: 'deviceId label lastUsedAt createdAt expiresAt revokedAt',
+ *     match: { revokedAt: null, expiresAt: { $gt: new Date() } } // optional filter at query time
+ *   })
+ */
+authSchema.virtual('trustedDevices', {
+  ref: 'TrustedDevice',
+  localField: '_id',
+  foreignField: 'user',
+  justOne: false,
+});
 
 authSchema.pre('save', function (next) {
   if (this.role && Array.isArray(this.role)) {
@@ -162,5 +179,7 @@ authSchema.index(
   { unique: true, collation: { locale: 'en', strength: 2 } }
 );
 authSchema.index({ username: 'text' });
+authSchema.index({ otpExpires: 1 });
+authSchema.index({ emailVerificationTokenExpiresAt: 1 });
 
 module.exports = mongoose.model('Auth', authSchema);

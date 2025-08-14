@@ -1,6 +1,10 @@
 const { logger } = require('@gaeservices/common');
 const { verifyOTPScheme } = require('../../../../schemes/otp');
 const { getUserForOTP, hashOTP } = require('../../../../utils/sms');
+const { generateTokens } = require('../../../../utils/generate-token.utils');
+const {
+  rememberTrustedDevice,
+} = require('../../../../utils/trusted-device.utils');
 
 exports.verifyOTP = async (req, res) => {
   logger.info('Verify OTP endpoint');
@@ -20,11 +24,8 @@ exports.verifyOTP = async (req, res) => {
 
     // Compare hashed values
     const candidate = hashOTP(value.otp, user._id);
-    const isExpired =
-      !user.otpExpires || new Date(user.otpExpires) < new Date();
-    const isMatch = user.otp && user.otp === candidate;
-
-    if (!isMatch || isExpired) {
+    const expired = !user.otpExpires || new Date(user.otpExpires) < Date.now();
+    if (!user.otp || user.otp !== candidate || expired) {
       return res
         .status(400)
         .json({ success: false, message: 'Invalid or expired OTP' });
@@ -35,11 +36,17 @@ exports.verifyOTP = async (req, res) => {
     user.otpExpires = undefined;
     await user.save({ validateModifiedOnly: true });
 
-    const { accessToken } = await generateTokens(res, user);
+    // set trusted-device cookie if asked
+    if (value.rememberDevice) {
+      await rememberTrustedDevice(user, req, res, {
+        label: value.deviceLabel,
+      });
+    }
 
+    const { accessToken } = await generateTokens(res, user);
     return res.status(200).json({ success: true, accessToken });
-  } catch (error) {
-    logger.error('Error occurred while verifying OTP code', error.message);
+  } catch (err) {
+    logger.error('Error occurred while verifying OTP code', err.message);
     return res
       .status(500)
       .json({ success: false, message: 'Internal server error' });
