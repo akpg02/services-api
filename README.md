@@ -1,4 +1,4 @@
-# E-Services
+# E-Services API Project
 
 A microservices api implement using Node.js and Express. The api is initially composed of a gateway (entry point), identity-service and a audit-log service. 
 
