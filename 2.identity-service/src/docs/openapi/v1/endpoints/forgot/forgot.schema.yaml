@@ -1,0 +1,21 @@
+ForgotRequest:
+  type: object
+  description: Forgot password
+  required:
+    - email
+  properties:
+    email:
+      type: string
+      format: email
+      example: 'test@hshop.com'
+
+ForgotResponse:
+  type: object
+  description: Forgot password response
+  properties:
+    success:
+      type: boolean
+      example: true
+    message:
+      type: string
+      example: 'Password reset link has been sent'

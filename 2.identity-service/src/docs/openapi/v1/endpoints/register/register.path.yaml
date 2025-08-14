@@ -1,0 +1,19 @@
+post:
+  summary: User registration
+  operationId: registerUser
+  tags:
+    - Auth
+    - Local
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: './register.schema.yaml#/RegisterRequest'
+  responses:
+    '201':
+      $ref: './register.responses.yaml#/RegisterSuccess'
+    '400':
+      $ref: './register.responses.yaml#/BadRequestRegister'
+    '500':
+      $ref: './register.responses.yaml#/ServerErrorRegister'

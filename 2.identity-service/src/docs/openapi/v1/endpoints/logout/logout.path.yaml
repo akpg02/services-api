@@ -1,0 +1,13 @@
+post:
+  summary: User logout
+  operationId: logoutUser
+  tags:
+    - Auth
+    - Token
+  responses:
+    '200':
+      $ref: './logout.responses.yaml#/LogoutSuccess'
+    '401':
+      $ref: './logout.responses.yaml#/LogoutUnauthorized'
+    '500':
+      $ref: '../../components/responses/server-error.yaml#/ServerError'

@@ -1,0 +1,19 @@
+post:
+  summary: User login
+  operationId: loginUser
+  tags:
+    - Auth
+    - Local
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: './login.schema.yaml#/LoginRequest'
+  responses:
+    '200':
+      $ref: './login.responses.yaml#/LoginSuccess'
+    '401':
+      $ref: './login.responses.yaml#/Unauthorized'
+    '500':
+      $ref: './login.responses.yaml#/ServerErrorLogin'

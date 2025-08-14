@@ -1,0 +1,23 @@
+get:
+  tags:
+    - Auth
+    - OAuth
+  summary: Handle OAuth provider callback
+  operationId: oauthCallback
+  description: |
+    Receives the OAuth provider’s callback, issues access & refresh tokens,
+    sets the HTTP-only `refreshToken` cookie, and then redirects the browser
+    to `/dashboard?token=<accessToken>`.
+  responses:
+    '200':
+      description: OAuth callback processed successfully (browser will follow redirect)
+    '302':
+      $ref: './oauth-callback.responses.yaml#/OAuthCallbackRedirect'
+    '400':
+      description: Bad request (e.g. missing or invalid OAuth code/state)
+      content:
+        application/json:
+          schema:
+            $ref: './oauth-callback.schema.yaml#/ErrorResponse'
+    '500':
+      $ref: '../../components/responses/error.yaml#/ErrorResponse'

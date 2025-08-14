@@ -1,0 +1,34 @@
+VerifyEmailSuccess:
+  description: Email verified successfully
+  content:
+    application/json:
+      schema:
+        $ref: './verify-email.schema.yaml#/VerifyEmailResponse'
+
+BadRequestVerifyEmail:
+  description: Invalid or expired verification code
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: false
+          message:
+            type: string
+            example: 'Invalid or expired verification code'
+
+ServerErrorVerifyEmail:
+  description: Server error
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: false
+          message:
+            type: string
+            example: 'Server error'

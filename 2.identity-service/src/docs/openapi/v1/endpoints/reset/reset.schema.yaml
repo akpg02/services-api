@@ -1,0 +1,21 @@
+ResetRequest:
+  type: object
+  description: Reset password
+  required:
+    - password
+  properties:
+    password:
+      type: string
+      format: password
+      example: secret123
+
+ResetResponse:
+  type: object
+  description: Reset password response
+  properties:
+    success:
+      type: boolean
+      example: true
+    message:
+      type: string
+      example: 'Password reset successfully'

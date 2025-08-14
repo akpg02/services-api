@@ -1,0 +1,100 @@
+[
+  {
+    "name": "Gateway",
+    "baseUrl": "http://localhost:8000",
+    "url": "http://localhost:8000/health",
+    "status": "DOWN",
+    "error": "socket hang up"
+  },
+  {
+    "name": "Identity",
+    "baseUrl": "http://localhost:8001",
+    "url": "http://localhost:8001/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Product",
+    "baseUrl": "http://localhost:8002",
+    "url": "http://localhost:8002/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Media",
+    "baseUrl": "http://localhost:8004",
+    "url": "http://localhost:8004/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Inventory",
+    "baseUrl": "http://localhost:8007",
+    "url": "http://localhost:8007/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Search",
+    "baseUrl": "http://localhost:8011",
+    "url": "http://localhost:8011/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Carts",
+    "baseUrl": "http://localhost:8005",
+    "url": "http://localhost:8005/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Orders",
+    "baseUrl": "http://localhost:8006",
+    "url": "http://localhost:8006/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Payments",
+    "baseUrl": "http://localhost:8009",
+    "url": "http://localhost:8009/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Shipment",
+    "baseUrl": "http://localhost:8012",
+    "url": "http://localhost:8012/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Notifications",
+    "baseUrl": "http://localhost:8008",
+    "url": "http://localhost:8008/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Analytics",
+    "baseUrl": "http://localhost:8013",
+    "url": "http://localhost:8013/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Promotions",
+    "baseUrl": "http://localhost:8010",
+    "url": "http://localhost:8010/health",
+    "status": "DOWN",
+    "error": ""
+  },
+  {
+    "name": "Audit Log",
+    "baseUrl": "http://localhost:8014",
+    "url": "http://localhost:8014/health",
+    "status": "DOWN",
+    "error": ""
+  }
+]

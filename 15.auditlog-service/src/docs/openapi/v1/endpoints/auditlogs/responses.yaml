@@ -1,0 +1,46 @@
+AuditLogCreated:
+  description: Audit log created
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success: { type: boolean, example: true }
+          data:
+            $ref: './log.schema.yaml#/AuditLog'
+        required: [success, data]
+
+AuditLogList:
+  description: List of audit logs
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          count: { type: integer, example: 2 }
+          data:
+            type: array
+            items:
+              $ref: './log.schema.yaml#/AuditLog'
+        required: [count, data]
+
+NotFound:
+  description: Audit log not found
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          message:
+            type: string
+            example: Not found
+
+ServerError:
+  description: Internal server error
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success: { type: boolean, example: false }
+          message: { type: string, example: Internal server error }

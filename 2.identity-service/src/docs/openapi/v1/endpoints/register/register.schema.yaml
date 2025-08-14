@@ -1,0 +1,32 @@
+RegisterRequest:
+  type: object
+  required:
+    - email
+    - username
+    - password
+  properties:
+    email:
+      type: string
+      format: email
+      example: user@example.com
+    username:
+      type: string
+      example: user123
+    password:
+      type: string
+      format: password
+      example: secret123
+
+RegisterResponse:
+  type: object
+  properties:
+    userId:
+      type: string
+      example: d290f1ee-6c54-4b01-90e6-d701748f0851
+    email:
+      type: string
+      format: email
+      example: user@example.com
+    username:
+      type: string
+      example: user123

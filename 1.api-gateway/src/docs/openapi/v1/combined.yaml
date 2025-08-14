@@ -1,0 +1,2415 @@
+openapi: 3.0.3
+info:
+  title: eServices API Gateway (combined)
+  version: 1.0.0
+  description: Aggregated API for all microservices
+servers:
+  - url: /
+    description: API Gateway
+paths:
+  /health:
+    get:
+      security: []
+      summary: Gateway health check
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+  /v1/auth/login:
+    post:
+      summary: User login
+      operationId: loginUser
+      tags:
+        - Auth
+        - Local
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Login with either email + password or username + password
+              oneOf:
+                - type: object
+                  description: Login via email
+                  required:
+                    - email
+                    - password
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                      example: user@example.com
+                    password:
+                      type: string
+                      format: password
+                      example: secret123
+                - type: object
+                  description: Login via username
+                  required:
+                    - username
+                    - password
+                  properties:
+                    username:
+                      type: string
+                      example: user123
+                    password:
+                      type: string
+                      format: password
+                      example: secret123
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    example: eyJo...
+                  refreshToken:
+                    type: string
+                    example: ooiu...
+                  authId:
+                    type: string
+                    example: ou9qw0r8qhf...
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid credentials
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Server error
+      security: []
+  /v1/auth/logout:
+    post:
+      summary: User logout
+      operationId: logoutUser
+      tags:
+        - Auth
+        - Token
+      responses:
+        '200':
+          description: Successful logout
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The tokens that were invalidated on logout.
+                properties:
+                  accessToken:
+                    type: string
+                    description: The (now-revoked) access token that was in use.
+                    example: eyJo0eXAiOiJKV1QiLCJhbGciOiJ...
+                  refreshToken:
+                    type: string
+                    description: >-
+                      The (now-revoked) refresh token that was stored in the
+                      cookie.
+                    example: ooiu89as7d9f87as9df...
+                  authId:
+                    type: string
+                    description: The user’s auth record ID whose tokens were revoked.
+                    example: ou9qw0r8qhf7ase8f...
+                required:
+                  - accessToken
+                  - refreshToken
+                  - authId
+        '401':
+          description: No valid refresh token provided
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates the call failed
+                    example: false
+                  message:
+                    type: string
+                    description: Human-readable error message
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Additional error details or validation failures
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+        '500':
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Something went wrong
+      security: []
+  /v1/auth/register:
+    post:
+      summary: User registration
+      operationId: registerUser
+      tags:
+        - Auth
+        - Local
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - username
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                username:
+                  type: string
+                  example: user123
+                password:
+                  type: string
+                  format: password
+                  example: secret123
+      responses:
+        '201':
+          description: Successful signup
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    example: d290f1ee-6c54-4b01-90e6-d701748f0851
+                  email:
+                    type: string
+                    format: email
+                    example: user@example.com
+                  username:
+                    type: string
+                    example: user123
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid input
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Server error
+      security: []
+  /v1/auth/forgot-password:
+    post:
+      summary: Forgot password
+      operationId: Forgotpswd
+      tags:
+        - Auth
+        - Local
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Forgot password
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: test@hshop.com
+      responses:
+        '200':
+          description: Password reset link sent to email
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Forgot password response
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password reset link has been sent
+        '400':
+          description: Invalid inputs or user not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid request
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User Not found
+        '500':
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Something went wrong
+      security: []
+  /v1/auth/verify-email:
+    post:
+      summary: Verify email
+      operationId: Verifyemail
+      tags:
+        - Auth
+        - Local
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Verify email
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+                  example: '123456'
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Verify email response
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Email verified successfully
+        '400':
+          description: Invalid or expired verification code
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid or expired verification code
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Server error
+      security: []
+  /v1/auth/refresh-token:
+    post:
+      tags:
+        - Auth
+        - Token
+      summary: Refresh an expired access token
+      operationId: refreshToken
+      responses:
+        '200':
+          description: Access token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: >-
+                  Newly issued access token; refresh token cookie is also
+                  rotated
+                properties:
+                  accessToken:
+                    type: string
+                    description: New JWT access token
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp...
+                required:
+                  - accessToken
+        '401':
+          description: No refresh token provided
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation failed
+                    example: false
+                  message:
+                    type: string
+                    description: Invalid or expired refresh token
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Optional list of error details (e.g. validation failures)
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+        '403':
+          description: Malformed or tampered refresh token (signature verification failed)
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation failed
+                    example: false
+                  message:
+                    type: string
+                    description: Invalid or expired refresh token
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Optional list of error details (e.g. validation failures)
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard server error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates the call failed
+                    example: false
+                  message:
+                    type: string
+                    description: Something went wrong
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: Time when the error occurred
+                    example: '2025-05-23T17:00:00Z'
+                  details:
+                    type: array
+                    description: >-
+                      Optional list of additional details (e.g. stack trace
+                      snippets)
+                    items:
+                      type: string
+                      example: Database connection timed out
+                required:
+                  - success
+                  - message
+      security: []
+  /v1/auth/reset-password/{token}:
+    post:
+      summary: Reset password
+      operationId: resetPassword
+      tags:
+        - Auth
+        - Local
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Password reset token
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Reset password
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  format: password
+                  example: secret123
+      responses:
+        '200':
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Reset password response
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password reset successfully
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Invalid or expired token
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Server error
+      security: []
+  /v1/auth/otp/send:
+    post:
+      tags:
+        - Auth
+        - OTP
+      summary: Send a one-time password (OTP) via email or SMS
+      operationId: sendOTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Request to send an OTP via email or SMS
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                phone:
+                  type: string
+                  example: '+15555550123'
+              oneOf:
+                - type: object
+                  description: Receive OTP via email
+                  required:
+                    - email
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                      example: user@example.com
+                - type: object
+                  description: Receive OTP via phone
+                  required:
+                    - phone
+                  properties:
+                    phone:
+                      type: string
+                      example: '+15555550123'
+      responses:
+        '200':
+          description: OTP code sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Acknowledgement that the OTP was sent
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: OTP sent via email
+                required:
+                  - success
+                  - message
+        '400':
+          description: Validation failed (e.g. missing email/phone)
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates the call failed
+                    example: false
+                  message:
+                    type: string
+                    description: Human-readable error message
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Additional error details or validation failures
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+        '404':
+          description: User not found for given email or phone
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates the call failed
+                    example: false
+                  message:
+                    type: string
+                    description: Human-readable error message
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Additional error details or validation failures
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates the call failed
+                    example: false
+                  message:
+                    type: string
+                    description: Human-readable error message
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: Time when the error occurred
+                    example: '2025-05-23T17:00:00Z'
+                  details:
+                    type: array
+                    description: >-
+                      Optional list of additional error details (e.g. stack
+                      trace snippets)
+                    items:
+                      type: string
+                      example: Database connection timed out
+                required:
+                  - success
+                  - message
+      security: []
+  /v1/auth/otp/verification:
+    post:
+      tags:
+        - Auth
+        - OTP
+      summary: Verify a one-time password (OTP) and issue tokens
+      operationId: verifyOTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Request to verify an OTP code
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                phone:
+                  type: string
+                  example: '+15555550123'
+                otp:
+                  type: string
+                  example: '123456'
+              required:
+                - otp
+              oneOf:
+                - type: object
+                  description: Receive OTP via email
+                  required:
+                    - email
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                      example: user@example.com
+                - type: object
+                  description: Receive OTP via phone
+                  required:
+                    - phone
+                  properties:
+                    phone:
+                      type: string
+                      example: '+15555550123'
+      responses:
+        '200':
+          description: OTP verified; new access token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Access token issued after successful OTP verification
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  accessToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                required:
+                  - success
+                  - accessToken
+        '400':
+          description: Validation failed or invalid/expired OTP
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates the call failed
+                    example: false
+                  message:
+                    type: string
+                    description: Human-readable error message
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Additional error details or validation failures
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates the call failed
+                    example: false
+                  message:
+                    type: string
+                    description: Human-readable error message
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Additional error details or validation failures
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+      security: []
+  /v1/auth/google:
+    get:
+      tags:
+        - Auth
+        - OAuth
+      summary: Handle OAuth provider callback
+      operationId: oauthCallback
+      description: |
+        Receives the OAuth provider’s callback, issues access & refresh tokens,
+        sets the HTTP-only `refreshToken` cookie, and then redirects the browser
+        to `/dashboard?token=<accessToken>`.
+      responses:
+        '200':
+          description: OAuth callback processed successfully (browser will follow redirect)
+        '302':
+          description: >-
+            OAuth callback redirects the user to the dashboard with a new access
+            token
+          headers:
+            Location:
+              description: Redirect URL including the access token as a query param
+              schema:
+                type: string
+                example: /dashboard?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Bad request (e.g. missing or invalid OAuth code/state)
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation failed
+                    example: false
+                  message:
+                    type: string
+                    description: Invalid or expired refresh token
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Optional list of error details (e.g. validation failures)
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+        '500':
+          description: Standard error response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid or expired refresh token
+      security: []
+  /v1/auth/github:
+    get:
+      tags:
+        - Auth
+        - OAuth
+      summary: Handle OAuth provider callback
+      operationId: oauthCallback
+      description: |
+        Receives the OAuth provider’s callback, issues access & refresh tokens,
+        sets the HTTP-only `refreshToken` cookie, and then redirects the browser
+        to `/dashboard?token=<accessToken>`.
+      responses:
+        '200':
+          description: OAuth callback processed successfully (browser will follow redirect)
+        '302':
+          description: >-
+            OAuth callback redirects the user to the dashboard with a new access
+            token
+          headers:
+            Location:
+              description: Redirect URL including the access token as a query param
+              schema:
+                type: string
+                example: /dashboard?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Bad request (e.g. missing or invalid OAuth code/state)
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation failed
+                    example: false
+                  message:
+                    type: string
+                    description: Invalid or expired refresh token
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Optional list of error details (e.g. validation failures)
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+        '500':
+          description: Standard error response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid or expired refresh token
+      security: []
+  /v1/auth/facebook:
+    get:
+      tags:
+        - Auth
+        - OAuth
+      summary: Handle OAuth provider callback
+      operationId: oauthCallback
+      description: |
+        Receives the OAuth provider’s callback, issues access & refresh tokens,
+        sets the HTTP-only `refreshToken` cookie, and then redirects the browser
+        to `/dashboard?token=<accessToken>`.
+      responses:
+        '200':
+          description: OAuth callback processed successfully (browser will follow redirect)
+        '302':
+          description: >-
+            OAuth callback redirects the user to the dashboard with a new access
+            token
+          headers:
+            Location:
+              description: Redirect URL including the access token as a query param
+              schema:
+                type: string
+                example: /dashboard?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Bad request (e.g. missing or invalid OAuth code/state)
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the operation failed
+                    example: false
+                  message:
+                    type: string
+                    description: Invalid or expired refresh token
+                    example: Invalid or expired refresh token
+                  details:
+                    type: array
+                    description: Optional list of error details (e.g. validation failures)
+                    items:
+                      type: string
+                      example: Username is required
+                required:
+                  - success
+                  - message
+        '500':
+          description: Standard error response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid or expired refresh token
+      security: []
+  /v1/users/me:
+    get:
+      tags:
+        - User
+      summary: Get the authenticated user's profile
+      operationId: user-me
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Single user retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Single-user payload
+                properties:
+                  data:
+                    type: object
+                    description: A user record
+                    properties:
+                      id:
+                        type: string
+                        description: MongoDB ObjectId
+                        example: 60af7c57b6e99974b8e8cea1
+                      username:
+                        type: string
+                        example: johndoe
+                      email:
+                        type: string
+                        format: email
+                        example: john.doe@example.com
+                      role:
+                        type: string
+                        example: user
+                      isActive:
+                        type: boolean
+                        example: true
+                required:
+                  - data
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-23T17:00:00Z'
+                required:
+                  - success
+                  - message
+  /v1/users/me/deactivation:
+    put:
+      tags:
+        - User
+      summary: Deactivate the authenticated user's account
+      operationId: deactivation
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Account deactivated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Generic success response
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Operation completed successfully
+                required:
+                  - success
+                  - message
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-23T17:00:00Z'
+                required:
+                  - success
+                  - message
+  /v1/users/me/change-password:
+    post:
+      tags:
+        - User
+      summary: Change password for the authenticated user
+      operationId: change-password
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Change the current user's password
+              properties:
+                currentPassword:
+                  type: string
+                  example: oldP@ssw0rd
+                newPassword:
+                  type: string
+                  example: n3wP@ss!
+              required:
+                - currentPassword
+                - newPassword
+      responses:
+        '200':
+          description: Entity updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Single-user payload
+                properties:
+                  data:
+                    type: object
+                    description: A user record
+                    properties:
+                      id:
+                        type: string
+                        description: MongoDB ObjectId
+                        example: 60af7c57b6e99974b8e8cea1
+                      username:
+                        type: string
+                        example: johndoe
+                      email:
+                        type: string
+                        format: email
+                        example: john.doe@example.com
+                      role:
+                        type: string
+                        example: user
+                      isActive:
+                        type: boolean
+                        example: true
+                required:
+                  - data
+        '400':
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-23T17:00:00Z'
+                required:
+                  - success
+                  - message
+  /v1/users/me/change-username:
+    patch:
+      tags:
+        - User
+      summary: Change username for the authenticated user
+      operationId: change-username
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Change the current user's username
+              properties:
+                username:
+                  type: string
+                  example: newusername
+              required:
+                - username
+      responses:
+        '200':
+          description: Entity updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Single-user payload
+                properties:
+                  data:
+                    type: object
+                    description: A user record
+                    properties:
+                      id:
+                        type: string
+                        description: MongoDB ObjectId
+                        example: 60af7c57b6e99974b8e8cea1
+                      username:
+                        type: string
+                        example: johndoe
+                      email:
+                        type: string
+                        format: email
+                        example: john.doe@example.com
+                      role:
+                        type: string
+                        example: user
+                      isActive:
+                        type: boolean
+                        example: true
+                required:
+                  - data
+        '400':
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-23T17:00:00Z'
+                required:
+                  - success
+                  - message
+  /v1/users/me/change-email:
+    patch:
+      tags:
+        - User
+      summary: Change email for the authenticated user
+      operationId: change-email
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Change the current user's email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: new.email@example.com
+              required:
+                - email
+      responses:
+        '200':
+          description: Entity updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Single-user payload
+                properties:
+                  data:
+                    type: object
+                    description: A user record
+                    properties:
+                      id:
+                        type: string
+                        description: MongoDB ObjectId
+                        example: 60af7c57b6e99974b8e8cea1
+                      username:
+                        type: string
+                        example: johndoe
+                      email:
+                        type: string
+                        format: email
+                        example: john.doe@example.com
+                      role:
+                        type: string
+                        example: user
+                      isActive:
+                        type: boolean
+                        example: true
+                required:
+                  - data
+        '400':
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-23T17:00:00Z'
+                required:
+                  - success
+                  - message
+  /v1/users/all:
+    get:
+      tags:
+        - User
+      summary: List all users (admin only)
+      operationId: all-users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of users retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                description: A paginated list of users
+                properties:
+                  count:
+                    type: integer
+                    example: 42
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      description: A user record
+                      properties:
+                        id:
+                          type: string
+                          description: MongoDB ObjectId
+                          example: 60af7c57b6e99974b8e8cea1
+                        username:
+                          type: string
+                          example: johndoe
+                        email:
+                          type: string
+                          format: email
+                          example: john.doe@example.com
+                        role:
+                          type: string
+                          example: user
+                        isActive:
+                          type: boolean
+                          example: true
+                required:
+                  - count
+                  - data
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-23T17:00:00Z'
+                required:
+                  - success
+                  - message
+  /v1/users/{id}/profile:
+    get:
+      tags:
+        - User
+      summary: Get a specific user's profile (admin only)
+      operationId: profile-by-id
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: MongoDB ObjectId of the user
+      responses:
+        '200':
+          description: Single user retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Single-user payload
+                properties:
+                  data:
+                    type: object
+                    description: A user record
+                    properties:
+                      id:
+                        type: string
+                        description: MongoDB ObjectId
+                        example: 60af7c57b6e99974b8e8cea1
+                      username:
+                        type: string
+                        example: johndoe
+                      email:
+                        type: string
+                        format: email
+                        example: john.doe@example.com
+                      role:
+                        type: string
+                        example: user
+                      isActive:
+                        type: boolean
+                        example: true
+                required:
+                  - data
+        '400':
+          description: Invalid user ID supplied
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-23T17:00:00Z'
+                required:
+                  - success
+                  - message
+  /v1/users/{id}/role:
+    patch:
+      tags:
+        - User
+      summary: Change a user's role (admin only)
+      operationId: change-role
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: MongoDB ObjectId of the user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Change another user's role (admin only)
+              properties:
+                role:
+                  type: string
+                  example: admin
+              required:
+                - role
+      responses:
+        '200':
+          description: Entity updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Single-user payload
+                properties:
+                  data:
+                    type: object
+                    description: A user record
+                    properties:
+                      id:
+                        type: string
+                        description: MongoDB ObjectId
+                        example: 60af7c57b6e99974b8e8cea1
+                      username:
+                        type: string
+                        example: johndoe
+                      email:
+                        type: string
+                        format: email
+                        example: john.doe@example.com
+                      role:
+                        type: string
+                        example: user
+                      isActive:
+                        type: boolean
+                        example: true
+                required:
+                  - data
+        '400':
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-23T17:00:00Z'
+                required:
+                  - success
+                  - message
+  /v1/users/{id}/deactivate-user:
+    put:
+      tags:
+        - User
+      summary: Deactivate another user's account (admin only)
+      operationId: deactivate-user
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: MongoDB ObjectId of the user to deactivate
+      responses:
+        '200':
+          description: Account deactivated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Generic success response
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Operation completed successfully
+                required:
+                  - success
+                  - message
+        '400':
+          description: Invalid user ID supplied
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '401':
+          description: Missing or invalid authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Standard error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Human-readable error message
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: Optional list of details (e.g. validation failures)
+                required:
+                  - success
+                  - message
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Internal server error response
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2025-05-23T17:00:00Z'
+                required:
+                  - success
+                  - message
+  /v1/audit-logs:
+    get:
+      tags:
+        - Audit
+      summary: List audit logs
+      description: Supports pagination, sorting, and simple filtering.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: sort
+          schema:
+            type: string
+            example: '-createdAt'
+          description: Sort by field (prepend '-' for descending)
+        - in: query
+          name: service
+          schema:
+            type: string
+        - in: query
+          name: userId
+          schema:
+            type: string
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of audit logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 2
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 66b5f1c0f7d5a1f2e1a3b456
+                        service:
+                          type: string
+                          example: api-gateway
+                        action:
+                          type: string
+                          example: user.deactivate
+                        actor:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: 64fa0a8f…
+                            type:
+                              type: string
+                              example: user
+                        resource:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: user
+                            id:
+                              type: string
+                              example: 64fa0a8f…
+                        ip:
+                          type: string
+                          example: 203.0.113.42
+                        userAgent:
+                          type: string
+                          example: Mozilla/5.0 (...)
+                        meta:
+                          type: object
+                          additionalProperties: true
+                        createdAt:
+                          type: string
+                          format: date-time
+                      required:
+                        - id
+                        - action
+                        - createdAt
+                required:
+                  - count
+                  - data
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+    post:
+      tags:
+        - Audit
+      summary: Create an audit log entry
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                service:
+                  type: string
+                  example: api-gateway
+                action:
+                  type: string
+                  example: user.deactivate
+                actor:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: 64fa0a8f…
+                    type:
+                      type: string
+                      example: user
+                resource:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: user
+                    id:
+                      type: string
+                      example: 64fa0a8f…
+                ip:
+                  type: string
+                  example: 203.0.113.42
+                userAgent:
+                  type: string
+                meta:
+                  type: object
+                  additionalProperties: true
+              required:
+                - action
+      responses:
+        '201':
+          description: Audit log created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 66b5f1c0f7d5a1f2e1a3b456
+                      service:
+                        type: string
+                        example: api-gateway
+                      action:
+                        type: string
+                        example: user.deactivate
+                      actor:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: 64fa0a8f…
+                          type:
+                            type: string
+                            example: user
+                      resource:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: user
+                          id:
+                            type: string
+                            example: 64fa0a8f…
+                      ip:
+                        type: string
+                        example: 203.0.113.42
+                      userAgent:
+                        type: string
+                        example: Mozilla/5.0 (...)
+                      meta:
+                        type: object
+                        additionalProperties: true
+                      createdAt:
+                        type: string
+                        format: date-time
+                    required:
+                      - id
+                      - action
+                      - createdAt
+                required:
+                  - success
+                  - data
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+  /v1/audit-logs/{id}:
+    get:
+      tags:
+        - Audit
+      summary: Get an audit log entry by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Audit log ID
+      responses:
+        '200':
+          description: Single audit log
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 66b5f1c0f7d5a1f2e1a3b456
+                      service:
+                        type: string
+                        example: api-gateway
+                      action:
+                        type: string
+                        example: user.deactivate
+                      actor:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: 64fa0a8f…
+                          type:
+                            type: string
+                            example: user
+                      resource:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: user
+                          id:
+                            type: string
+                            example: 64fa0a8f…
+                      ip:
+                        type: string
+                        example: 203.0.113.42
+                      userAgent:
+                        type: string
+                        example: Mozilla/5.0 (...)
+                      meta:
+                        type: object
+                        additionalProperties: true
+                      createdAt:
+                        type: string
+                        format: date-time
+                    required:
+                      - id
+                      - action
+                      - createdAt
+                required:
+                  - success
+                  - data
+        '401':
+          description: Unauthorized
+        '404':
+          description: Audit log not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Internal server error
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - BearerAuth: []

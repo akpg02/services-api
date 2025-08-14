@@ -1,0 +1,13 @@
+LogoutSuccess:
+  description: Successful logout
+  content:
+    application/json:
+      schema:
+        $ref: './logout.schema.yaml#/LogoutResponse'
+
+LogoutUnauthorized:
+  description: No valid refresh token provided
+  content:
+    application/json:
+      schema:
+        $ref: './logout.schema.yaml#/ErrorResponse'

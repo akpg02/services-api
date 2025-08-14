@@ -1,0 +1,53 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "eServices API Gateway (combined)",
+    "version": "1.0.0",
+    "description": "Aggregated API for all microservices"
+  },
+  "servers": [{ "url": "/", "description": "API Gateway" }],
+  "paths": {
+    "/health": {
+      "get": {
+        "security": [],
+        "summary": "Gateway health check",
+        "tags": ["Health"],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "apis": [
+    {
+      "url": "src/docs/openapi/v1/services/identity/index.yaml",
+      "paths": { "exclude": ["/health"] }
+    },
+    {
+      "url": "src/docs/openapi/v1/services/auditlogs/index.yaml",
+      "paths": { "exclude": ["/health"] }
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [{ "BearerAuth": [] }]
+}

@@ -1,0 +1,191 @@
+openapi: 3.0.3
+info:
+  title: Identity Service Microservice
+  version: 1.0.0
+  description: Authentication and authorization of users.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8001
+
+tags:
+  - name: Auth
+    description: Authentication-related endpoints
+  - name: Health
+    description: API status check
+  - name: Local
+    description: Standard endpoints
+  - name: OAuth
+    description: OAuth endpoints
+  - name: Token
+    description: Token related endpoints
+  - name: OTP
+    description: OTP endpoints
+  - name: User
+    description: User-related endpoints
+
+x-tagGroups:
+  - name: Authentication
+    tags:
+      - Health
+      - Local
+      - OAuth
+      - Token
+      - OTP
+  - name: User
+    tags:
+      - User
+
+paths:
+  /health:
+    $ref: './endpoints/health/health.path.yaml'
+  /v1/auth/login:
+    $ref: './endpoints/login/login.path.yaml'
+  /v1/auth/logout:
+    $ref: './endpoints/logout/logout.path.yaml'
+  /v1/auth/register:
+    $ref: './endpoints/register/register.path.yaml'
+  /v1/auth/forgot-password:
+    $ref: './endpoints/forgot/forgot.path.yaml'
+  /v1/auth/verify-email:
+    $ref: './endpoints/verify-email/verify-email.path.yaml'
+  /v1/auth/refresh-token:
+    $ref: './endpoints/refresh-token/refresh.path.yaml'
+  /v1/auth/reset-password/{token}:
+    $ref: './endpoints/reset/reset.path.yaml'
+  /v1/auth/otp/send:
+    $ref: './endpoints/otp/send.path.yaml'
+  /v1/auth/otp/verification:
+    $ref: './endpoints/otp/verify.path.yaml'
+
+  /v1/auth/google:
+    $ref: './endpoints/oauth/oauth-callback.path.yaml'
+  /v1/auth/github:
+    $ref: './endpoints/oauth/oauth-callback.path.yaml'
+  /v1/auth/facebook:
+    $ref: './endpoints/oauth/oauth-callback.path.yaml'
+
+  /v1/users/me:
+    $ref: './endpoints/users/paths/me.path.yaml'
+  /v1/users/me/deactivation:
+    $ref: './endpoints/users/paths/deactivate-account.path.yaml'
+  /v1/users/me/change-password:
+    $ref: './endpoints/users/paths/change-password.path.yaml'
+  /v1/users/me/change-username:
+    $ref: './endpoints/users/paths/change-username.path.yaml'
+  /v1/users/me/change-email:
+    $ref: './endpoints/users/paths/change-email.path.yaml'
+
+  /v1/users/all:
+    $ref: './endpoints/users/paths/all.path.yaml'
+  /v1/users/{id}/profile:
+    $ref: './endpoints/users/paths/profile-by-id.path.yaml'
+  /v1/users/{id}/role:
+    $ref: './endpoints/users/paths/change-role.path.yaml'
+  /v1/users/{id}/deactivate-user:
+    $ref: './endpoints/users/paths/deactivate-user.path.yaml'
+
+components:
+  schemas:
+    HealthResponse:
+      $ref: './endpoints/health/health.schema.yaml#/HealthResponse'
+    LoginRequest:
+      $ref: './endpoints/login/login.schema.yaml#/LoginRequest'
+    LoginResponse:
+      $ref: './endpoints/login/login.schema.yaml#/LoginResponse'
+
+    LogoutResponse:
+      $ref: './endpoints/logout/logout.schema.yaml#/LogoutResponse'
+
+    RegisterRequest:
+      $ref: './endpoints/register/register.schema.yaml#/RegisterRequest'
+    RegisterResponse:
+      $ref: './endpoints/register/register.schema.yaml#/RegisterResponse'
+    ForgotRequest:
+      $ref: './endpoints/forgot/forgot.schema.yaml#/ForgotRequest'
+    ForgotResponse:
+      $ref: './endpoints/forgot/forgot.schema.yaml#/ForgotResponse'
+    VerifyEmailRequest:
+      $ref: './endpoints/verify-email/verify-email.schema.yaml#/VerifyEmailRequest'
+    VerifyEmailResponse:
+      $ref: './endpoints/verify-email/verify-email.schema.yaml#/VerifyEmailResponse'
+    RefreshResponse:
+      $ref: './endpoints/refresh-token/refresh.schema.yaml#/RefreshResponse'
+
+    SendOTPRequest:
+      $ref: './endpoints/otp/otp.schema.yaml#/SendOTPRequest'
+    SendOTPResponse:
+      $ref: './endpoints/otp/otp.schema.yaml#/SendOTPResponse'
+    VerifyOTPRequest:
+      $ref: './endpoints/otp/otp.schema.yaml#/VerifyOTPRequest'
+    VerifyOTPResponse:
+      $ref: './endpoints/otp/otp.schema.yaml#/VerifyOTPResponse'
+
+    ResetRequest:
+      $ref: './endpoints/reset/reset.schema.yaml#/ResetRequest'
+    ResetResponse:
+      $ref: './endpoints/reset/reset.schema.yaml#/ResetResponse'
+
+  responses:
+    HealthSuccess:
+      $ref: './endpoints/health/health.responses.yaml#/HealthSuccess'
+    HealthError:
+      $ref: './endpoints/health/health.responses.yaml#/HealthError'
+
+    LoginSuccess:
+      $ref: './endpoints/login/login.responses.yaml#/LoginSuccess'
+    Unauthorized:
+      $ref: './endpoints/login/login.responses.yaml#/Unauthorized'
+
+    logoutSuccess:
+      $ref: './endpoints/logout/logout.responses.yaml#/LogoutSuccess'
+
+    RegisterSuccess:
+      $ref: './endpoints/register/register.responses.yaml#/RegisterSuccess'
+    BadRequestRegister:
+      $ref: './endpoints/register/register.responses.yaml#/BadRequestRegister'
+
+    ForgotSuccess:
+      $ref: './endpoints/forgot/forgot.responses.yaml#/ForgotSuccess'
+    BadRequestForgot:
+      $ref: './endpoints/forgot/forgot.responses.yaml#/BadRequestForgot'
+
+    VerifyEmailSuccess:
+      $ref: './endpoints/verify-email/verify-email.responses.yaml#/VerifyEmailSuccess'
+    BadRequestVerifyEmail:
+      $ref: './endpoints/verify-email/verify-email.responses.yaml#/BadRequestVerifyEmail'
+    ServerErrorVerifyEmail:
+      $ref: './endpoints/verify-email/verify-email.responses.yaml#/ServerErrorVerifyEmail'
+
+    ResetSuccess:
+      $ref: './endpoints/reset/reset.responses.yaml#/ResetSuccess'
+    BadRequestReset:
+      $ref: './endpoints/reset/reset.responses.yaml#/BadRequestReset'
+    ServerErrorReset:
+      $ref: './endpoints/reset/reset.responses.yaml#/ServerErrorReset'
+
+    RefreshSuccess:
+      $ref: './endpoints/refresh-token/refresh.responses.yaml#/RefreshSuccess'
+    RefreshErrorMissing:
+      $ref: './endpoints/refresh-token/refresh.responses.yaml#/RefreshErrorMissing'
+
+    RefreshErrorForbidden:
+      $ref: './endpoints/refresh-token/refresh.responses.yaml#/RefreshErrorForbidden'
+    ServerError:
+      $ref: './endpoints/refresh-token/refresh.responses.yaml#/ServerError'
+
+    OAuthCallbackRedirect:
+      $ref: './endpoints/oauth/oauth-callback.responses.yaml#/OAuthCallbackRedirect'
+
+    NotFound:
+      $ref: './components/responses/not-found.yaml#/NotFound'
+    ErrorResponse:
+      $ref: './components/responses/error.yaml#/ErrorResponse'
+
+  securitySchemes:
+    BearerAuth:
+      $ref: './components/securitySchemes.yaml#/BearerAuth'
+
+security: []

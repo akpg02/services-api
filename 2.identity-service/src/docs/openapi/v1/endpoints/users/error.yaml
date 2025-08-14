@@ -1,0 +1,36 @@
+ErrorResponse:
+  type: object
+  description: Standard error response
+  properties:
+    success:
+      type: boolean
+      example: false
+    message:
+      type: string
+      example: 'Human-readable error message'
+    details:
+      type: array
+      items:
+        type: string
+      description: Optional list of details (e.g. validation failures)
+  required:
+    - success
+    - message
+
+ServerError:
+  type: object
+  description: Internal server error response
+  properties:
+    success:
+      type: boolean
+      example: false
+    message:
+      type: string
+      example: 'Internal server error'
+    timestamp:
+      type: string
+      format: date-time
+      example: '2025-05-23T17:00:00Z'
+  required:
+    - success
+    - message

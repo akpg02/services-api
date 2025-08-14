@@ -1,0 +1,19 @@
+post:
+  summary: Verify email
+  operationId: Verifyemail
+  tags:
+    - Auth
+    - Local
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: './verify-email.schema.yaml#/VerifyEmailRequest'
+  responses:
+    '200':
+      $ref: './verify-email.responses.yaml#/VerifyEmailSuccess'
+    '400':
+      $ref: './verify-email.responses.yaml#/BadRequestVerifyEmail'
+    '500':
+      $ref: './verify-email.responses.yaml#/ServerErrorVerifyEmail'

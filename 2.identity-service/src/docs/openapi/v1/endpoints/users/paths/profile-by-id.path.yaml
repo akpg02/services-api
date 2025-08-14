@@ -1,0 +1,25 @@
+get:
+  tags: [User]
+  summary: Get a specific user's profile (admin only)
+  operationId: profile-by-id
+  security: [{ BearerAuth: [] }]
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the user
+  responses:
+    '200':
+      $ref: '../users.responses.yaml#/GetUserSuccess'
+    '400':
+      $ref: '../users.responses.yaml#/InvalidId'
+    '401':
+      $ref: '../users.responses.yaml#/Unauthorized'
+    '403':
+      $ref: '../users.responses.yaml#/Forbidden'
+    '404':
+      $ref: '../users.responses.yaml#/NotFound'
+    '500':
+      $ref: '../users.responses.yaml#/ServerError'

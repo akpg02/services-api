@@ -1,0 +1,31 @@
+RegisterSuccess:
+  description: Successful signup
+  content:
+    application/json:
+      schema:
+        $ref: './register.schema.yaml#/RegisterResponse'
+
+BadRequestRegister:
+  description: Invalid request data
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          message:
+            type: string
+            example: Invalid input
+
+ServerErrorRegister:
+  description: Server error
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: false
+          message:
+            type: string
+            example: 'Server error'

@@ -1,0 +1,34 @@
+ResetSuccess:
+  description: Password reset successfully
+  content:
+    application/json:
+      schema:
+        $ref: './reset.schema.yaml#/ResetResponse'
+
+BadRequestReset:
+  description: Invalid or expired token
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: false
+          message:
+            type: string
+            example: 'Invalid or expired token'
+
+ServerErrorReset:
+  description: Server error
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: false
+          message:
+            type: string
+            example: 'Server error'

@@ -1,0 +1,20 @@
+VerifyEmailRequest:
+  type: object
+  description: Verify email
+  required:
+    - code
+  properties:
+    code:
+      type: string
+      example: '123456'
+
+VerifyEmailResponse:
+  type: object
+  description: Verify email response
+  properties:
+    success:
+      type: boolean
+      example: true
+    message:
+      type: string
+      example: 'Email verified successfully'

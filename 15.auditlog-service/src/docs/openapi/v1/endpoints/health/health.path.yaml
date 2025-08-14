@@ -1,0 +1,16 @@
+get:
+  servers:
+    - url: http://localhost:8000
+      description: Via API Gateway
+    - url: http://localhost:8014
+      description: Audit Log Service
+
+  summary: Health check
+  operationId: getHealth
+  tags:
+    - Health
+  responses:
+    '200':
+      $ref: './health.responses.yaml#/HealthSuccess'
+    '400': # ← added 4XX response
+      $ref: './health.responses.yaml#/HealthError'

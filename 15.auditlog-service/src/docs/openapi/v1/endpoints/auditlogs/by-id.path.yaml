@@ -1,0 +1,29 @@
+get:
+  tags: [Audit]
+  summary: Get an audit log entry by ID
+  security:
+    - BearerAuth: []
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema: { type: string }
+      description: Audit log ID
+  responses:
+    '200':
+      description: Single audit log
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: true }
+              data:
+                $ref: './log.schema.yaml#/AuditLog'
+            required: [success, data]
+    '404':
+      $ref: './responses.yaml#/NotFound'
+    '401':
+      description: Unauthorized
+    '500':
+      $ref: './responses.yaml#/ServerError'

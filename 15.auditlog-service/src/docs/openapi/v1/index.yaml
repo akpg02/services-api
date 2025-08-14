@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: Audit Log Microservice
+  version: 1.0.0
+  description: Write and query audit log entries.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: /
+    description: Via API Gateway
+  - url: http://localhost:8014
+    description: Audit Log Microservice
+
+tags:
+  - name: Health
+    description: Service status
+  - name: Audit
+    description: Audit log endpoints
+
+x-tagGroups:
+  - name: System
+    tags: [Health]
+  - name: Audit
+    tags: [Audit]
+
+paths:
+  /health:
+    $ref: './endpoints/health/health.path.yaml'
+  /v1/audit-logs:
+    $ref: './endpoints/auditlogs/root.path.yaml'
+  /v1/audit-logs/{id}:
+    $ref: './endpoints/auditlogs/by-id.path.yaml'
+
+components:
+  schemas:
+    AuditLog:
+      $ref: './endpoints/auditlogs/log.schema.yaml#/AuditLog'
+    CreateAuditLogRequest:
+      $ref: './endpoints/auditlogs/create.schema.yaml#/CreateAuditLogRequest'
+
+  responses:
+    HealthSuccess:
+      $ref: './endpoints/health/health.responses.yaml#/HealthSuccess'
+    HealthError:
+      $ref: './endpoints/health/health.responses.yaml#/HealthError'
+    AuditLogCreated:
+      $ref: './endpoints/auditlogs/responses.yaml#/AuditLogCreated'
+    AuditLogList:
+      $ref: './endpoints/auditlogs/responses.yaml#/AuditLogList'
+    NotFound:
+      $ref: './endpoints/auditlogs/responses.yaml#/NotFound'
+    ServerError:
+      $ref: './endpoints/auditlogs/responses.yaml#/ServerError'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security: []

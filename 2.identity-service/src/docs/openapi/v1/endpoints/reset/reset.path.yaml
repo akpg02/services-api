@@ -1,0 +1,27 @@
+post:
+  summary: Reset password
+  operationId: resetPassword
+  tags:
+    - Auth
+    - Local
+
+  parameters:
+    - name: token
+      in: path
+      required: true
+      description: Password reset token
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: './reset.schema.yaml#/ResetRequest'
+  responses:
+    '200':
+      $ref: './reset.responses.yaml#/ResetSuccess'
+    '400':
+      $ref: './reset.responses.yaml#/BadRequestReset'
+    '500':
+      $ref: './reset.responses.yaml#/ServerErrorReset'

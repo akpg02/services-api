@@ -1,0 +1,29 @@
+patch:
+  tags: [User]
+  summary: Change a user's role (admin only)
+  operationId: change-role
+  security: [{ BearerAuth: [] }]
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the user
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../user.schema.yaml#/ChangeRoleRequest'
+  responses:
+    '200':
+      $ref: '../users.responses.yaml#/UpdateSuccess'
+    '400':
+      $ref: '../users.responses.yaml#/ValidationError'
+    '401':
+      $ref: '../users.responses.yaml#/Unauthorized'
+    '403':
+      $ref: '../users.responses.yaml#/Forbidden'
+    '500':
+      $ref: '../users.responses.yaml#/ServerError'

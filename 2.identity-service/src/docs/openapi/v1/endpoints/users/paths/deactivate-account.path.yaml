@@ -1,0 +1,12 @@
+put:
+  tags: [User]
+  summary: Deactivate the authenticated user's account
+  operationId: deactivation
+  security: [{ BearerAuth: [] }]
+  responses:
+    '200':
+      $ref: '../users.responses.yaml#/DeactivateSuccess'
+    '401':
+      $ref: '../users.responses.yaml#/Unauthorized'
+    '500':
+      $ref: '../users.responses.yaml#/ServerError'

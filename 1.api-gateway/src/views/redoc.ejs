@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>API Docs</title>
+  </head>
+  <body>
+    <div id="redoc-container"></div>
+
+    <script
+      src="https://cdn.redocly.com/redoc/v2.5.0/bundles/redoc.standalone.js"
+      nonce="<%= nonce %>"
+    ></script>
+    <script nonce="<%= nonce %>">
+      Redoc.init(
+        '<%= specUrl %>',
+        {},
+        document.getElementById('redoc-container')
+      );
+    </script>
+  </body>
+</html>

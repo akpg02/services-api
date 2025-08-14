@@ -1,0 +1,10 @@
+ServerError:
+  description: Something went wrong
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          message:
+            type: string
+            example: Something went wrong
