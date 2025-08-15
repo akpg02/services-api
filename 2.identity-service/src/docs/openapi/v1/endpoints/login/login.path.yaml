@@ -1,19 +1,27 @@
-post:
-  summary: User login
-  operationId: loginUser
-  tags:
-    - Auth
-    - Local
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          $ref: './login.schema.yaml#/LoginRequest'
-  responses:
-    '200':
-      $ref: './login.responses.yaml#/LoginSuccess'
-    '401':
-      $ref: './login.responses.yaml#/Unauthorized'
-    '500':
-      $ref: './login.responses.yaml#/ServerErrorLogin'
+/v1/auth/login:
+  post:
+    summary: User login
+    tags: [Auth, Local]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+    responses:
+      '200':
+        description: Login success (trusted device)
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginSuccessResponse'
+      '202':
+        description: OTP required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginOTPRequiredResponse'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '500':
+        $ref: '#/components/responses/ServerError'

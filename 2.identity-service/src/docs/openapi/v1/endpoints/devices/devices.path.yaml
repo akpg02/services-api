@@ -1,0 +1,83 @@
+DevicesRoot:
+  get:
+    tags: [Devices]
+    summary: List trusted devices
+    description: >
+      Returns trusted devices bound to the authenticated user. Requires BearerAuth.
+      Use query flags to include revoked/expired entries.
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: query
+        name: includeRevoked
+        schema: { type: boolean, default: false }
+        description: Include devices that were revoked
+      - in: query
+        name: includeExpired
+        schema: { type: boolean, default: false }
+        description: Include devices that have expired
+      - in: query
+        name: page
+        schema: { type: integer, minimum: 1, default: 1 }
+      - in: query
+        name: limit
+        schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    responses:
+      '200':
+        description: List of trusted devices
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrustedDeviceList'
+      '401':
+        $ref: '../../components/responses/error.yaml#/ErrorResponse'
+
+  delete:
+    tags: [Devices]
+    summary: Revoke all trusted devices
+    description: >
+      Revokes all trusted devices for the authenticated user. Requires BearerAuth.
+      Does not log the user out; it only removes “trust this device” entries.
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: All devices revoked
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeDevicesResponse'
+      '401':
+        $ref: '../../components/responses/error.yaml#/ErrorResponse'
+
+DevicesById:
+  delete:
+    tags: [Devices]
+    summary: Revoke a specific trusted device
+    description: >
+      Revokes a single trusted device by its id. Requires BearerAuth.
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: TrustedDevice document id
+        schema:
+          type: string
+          example: 66f1c1b0f0a2f9c1a3a1b2c3
+    responses:
+      '200':
+        description: Device revoked
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeDevicesResponse'
+      '404':
+        description: Device not found
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/responses/error.yaml#/ErrorResponse'
+      '401':
+        $ref: '../../components/responses/error.yaml#/ErrorResponse'
