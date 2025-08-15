@@ -4,9 +4,7 @@ LoginRequest:
   oneOf:
     - type: object
       description: Login via email
-      required:
-        - email
-        - password
+      required: [email, password]
       properties:
         email:
           type: string
@@ -18,9 +16,7 @@ LoginRequest:
           example: secret123
     - type: object
       description: Login via username
-      required:
-        - username
-        - password
+      required: [username, password]
       properties:
         username:
           type: string
@@ -30,15 +26,45 @@ LoginRequest:
           format: password
           example: secret123
 
-LoginResponse:
+# 200 OK — trusted device, MFA skipped
+LoginSuccessResponse:
   type: object
+  description: Successful login; refresh token is set as an HTTP-only cookie.
   properties:
+    success:
+      type: boolean
+      example: true
     accessToken:
       type: string
-      example: eyJo...
-    refreshToken:
+      description: Short-lived JWT access token
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    mfaSkipped:
+      type: boolean
+      description: True if a valid trusted-device cookie allowed skipping OTP
+      example: true
+  required: [success, accessToken]
+
+# 202 Accepted — MFA required
+LoginOTPRequiredResponse:
+  type: object
+  description: Credentials valid; an OTP was sent and must be verified to finish login.
+  properties:
+    success:
+      type: boolean
+      example: true
+    requiresOTP:
+      type: boolean
+      example: true
+    delivery:
       type: string
-      example: ooiu...
-    authId:
+      description: Channel used to deliver OTP
+      enum: [email, sms]
+      example: email
+    to:
       type: string
-      example: ou9qw0r8qhf...
+      description: Masked destination (email or phone)
+      example: u***r@example.com
+    hint:
+      type: string
+      example: Submit OTP to /v1/auth/otp/verify to complete login
+  required: [success, requiresOTP, delivery, to]

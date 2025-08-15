@@ -25,18 +25,16 @@ tags:
     description: OTP endpoints
   - name: User
     description: User-related endpoints
+  - name: Devices
+    description: Manage trusted login devices
 
 x-tagGroups:
   - name: Authentication
-    tags:
-      - Health
-      - Local
-      - OAuth
-      - Token
-      - OTP
+    tags: [Health, Local, OAuth, Token, OTP]
   - name: User
-    tags:
-      - User
+    tags: [User]
+  - name: Security
+    tags: [Devices]
 
 paths:
   /health:
@@ -59,6 +57,11 @@ paths:
     $ref: './endpoints/otp/send.path.yaml'
   /v1/auth/otp/verification:
     $ref: './endpoints/otp/verify.path.yaml'
+
+  /v1/auth/devices:
+    $ref: './endpoints/devices/devices.path.yaml#/DevicesRoot'
+  /v1/auth/devices/{id}:
+    $ref: './endpoints/devices/devices.path.yaml#/DevicesById'
 
   /v1/auth/google:
     $ref: './endpoints/oauth/oauth-callback.path.yaml'
@@ -91,6 +94,7 @@ components:
   schemas:
     HealthResponse:
       $ref: './endpoints/health/health.schema.yaml#/HealthResponse'
+
     LoginRequest:
       $ref: './endpoints/login/login.schema.yaml#/LoginRequest'
     LoginResponse:
@@ -103,14 +107,17 @@ components:
       $ref: './endpoints/register/register.schema.yaml#/RegisterRequest'
     RegisterResponse:
       $ref: './endpoints/register/register.schema.yaml#/RegisterResponse'
+
     ForgotRequest:
       $ref: './endpoints/forgot/forgot.schema.yaml#/ForgotRequest'
     ForgotResponse:
       $ref: './endpoints/forgot/forgot.schema.yaml#/ForgotResponse'
+
     VerifyEmailRequest:
       $ref: './endpoints/verify-email/verify-email.schema.yaml#/VerifyEmailRequest'
     VerifyEmailResponse:
       $ref: './endpoints/verify-email/verify-email.schema.yaml#/VerifyEmailResponse'
+
     RefreshResponse:
       $ref: './endpoints/refresh-token/refresh.schema.yaml#/RefreshResponse'
 
@@ -127,6 +134,13 @@ components:
       $ref: './endpoints/reset/reset.schema.yaml#/ResetRequest'
     ResetResponse:
       $ref: './endpoints/reset/reset.schema.yaml#/ResetResponse'
+
+    TrustedDevice:
+      $ref: './endpoints/devices/devices.schema.yaml#/TrustedDevice'
+    TrustedDeviceList:
+      $ref: './endpoints/devices/devices.schema.yaml#/TrustedDeviceList'
+    RevokeDevicesResponse:
+      $ref: './endpoints/devices/devices.schema.yaml#/RevokeDevicesResponse'
 
   responses:
     HealthSuccess:
@@ -170,7 +184,6 @@ components:
       $ref: './endpoints/refresh-token/refresh.responses.yaml#/RefreshSuccess'
     RefreshErrorMissing:
       $ref: './endpoints/refresh-token/refresh.responses.yaml#/RefreshErrorMissing'
-
     RefreshErrorForbidden:
       $ref: './endpoints/refresh-token/refresh.responses.yaml#/RefreshErrorForbidden'
     ServerError:
