@@ -14,8 +14,8 @@ The entry point to the overall api. Its main responsibility to manage user acces
 1. In the terminal: `npm run watch`
 2. Browse the gateway health status at `localhost:8000/health`
 3. Refer to api documentation using either of the following endpoints:
-   - `http://localhost:8000/docs/redoc`
-   - `http://localhost:8000/docs/swagger`
+   - `https://localhost:8000/docs/redoc`
+   - `https://localhost:8000/docs/swagger`
 
 ## Documentation
 
@@ -36,11 +36,11 @@ The entry point to the overall api. Its main responsibility to manage user acces
 
 ##### OpenAPI documentation rendered in ReDoc
 
-`http://localhost:8000/docs/redoc`
+`https://localhost:8000/docs/redoc`
 
 ##### Documentation rendered in Swagger UI
 
-`http://localhost:8000/docs/swagger`
+`https://localhost:8000/docs/swagger`
 
 ## Running the Tests
 
