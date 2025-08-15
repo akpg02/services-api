@@ -1,10 +1,14 @@
 const Queue = require('bull');
 const { logger } = require('@gaeservices/common');
 const { sendOTPSchema } = require('../../../../schemes/otp');
-const { sendSMS, getUserForOTP, hashOTP } = require('../../../../utils/sms');
+const {
+  sendSMS,
+  getUserForOTP,
+  hashOTP,
+} = require('../../../../utils/sms.utils');
 const {
   generateVerificationCode,
-} = require('../../../../utils/generate-token');
+} = require('../../../../utils/generate-token.utils');
 
 const emailQueue = new Queue('emailQueue');
 

@@ -5,7 +5,6 @@ const { profileRouter } = require('./profile/profile.router');
 const { changePasswordRouter } = require('./password/update/password.router');
 const { usernameRouter } = require('./update/username/username.router');
 const { changeEmailRouter } = require('./update/email/email.router');
-const { deviceRouter } = require('./devices/devices.router');
 const { usersRouter } = require('./users/users.router');
 const { roleRouter } = require('./role/role.router');
 
@@ -18,7 +17,7 @@ router.use('/', deactivateRouter);
 router.use('/me/change-password', changePasswordRouter);
 router.use('/me/change-username', usernameRouter);
 router.use('/me/change-email', changeEmailRouter);
-router.use('/me/devices', deviceRouter);
+
 
 // admin routes
 router.use(restrictTo('admin'));

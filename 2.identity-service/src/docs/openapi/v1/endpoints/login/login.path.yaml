@@ -7,21 +7,21 @@
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/LoginRequest'
+            $ref: './login.schema.yaml#/LoginRequest'
     responses:
       '200':
         description: Login success (trusted device)
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginSuccessResponse'
+              $ref: './login.schema.yaml#/LoginSuccessResponse'
       '202':
         description: OTP required
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginOTPRequiredResponse'
+              $ref: './login.schema.yaml#/LoginOTPRequiredResponse'
       '401':
-        $ref: '#/components/responses/Unauthorized'
+        $ref: './login.responses.yaml#/Unauthorized'
       '500':
-        $ref: '#/components/responses/ServerError'
+        $ref: './login.responses.yaml#/ServerErrorLogin'

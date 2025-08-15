@@ -1,6 +1,6 @@
 const { logger } = require('@gaeservices/common');
 const { verifyOTPScheme } = require('../../../../schemes/otp');
-const { getUserForOTP, hashOTP } = require('../../../../utils/sms');
+const { getUserForOTP, hashOTP } = require('../../../../utils/sms.utils');
 const { generateTokens } = require('../../../../utils/generate-token.utils');
 const {
   rememberTrustedDevice,

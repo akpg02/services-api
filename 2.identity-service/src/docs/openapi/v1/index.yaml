@@ -26,7 +26,7 @@ tags:
   - name: User
     description: User-related endpoints
   - name: Devices
-    description: Manage trusted login devices
+    description: Trusted device management (remember / revoke)
 
 x-tagGroups:
   - name: Authentication
@@ -94,11 +94,10 @@ components:
   schemas:
     HealthResponse:
       $ref: './endpoints/health/health.schema.yaml#/HealthResponse'
-
     LoginRequest:
       $ref: './endpoints/login/login.schema.yaml#/LoginRequest'
     LoginResponse:
-      $ref: './endpoints/login/login.schema.yaml#/LoginResponse'
+      $ref: './endpoints/login/login.schema.yaml#/LoginSuccessResponse'
 
     LogoutResponse:
       $ref: './endpoints/logout/logout.schema.yaml#/LogoutResponse'

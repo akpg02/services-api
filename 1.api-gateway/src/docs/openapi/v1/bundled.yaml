@@ -25,88 +25,126 @@ paths:
                     type: string
                     example: ok
   /v1/auth/login:
-    post:
-      summary: User login
-      operationId: loginUser
-      tags:
-        - Auth
-        - Local
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              description: Login with either email + password or username + password
-              oneOf:
-                - type: object
-                  description: Login via email
-                  required:
-                    - email
-                    - password
+    /v1/auth/login:
+      post:
+        summary: User login
+        tags:
+          - Auth
+          - Local
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Login with either email + password or username + password
+                oneOf:
+                  - type: object
+                    description: Login via email
+                    required:
+                      - email
+                      - password
+                    properties:
+                      email:
+                        type: string
+                        format: email
+                        example: user@example.com
+                      password:
+                        type: string
+                        format: password
+                        example: secret123
+                  - type: object
+                    description: Login via username
+                    required:
+                      - username
+                      - password
+                    properties:
+                      username:
+                        type: string
+                        example: user123
+                      password:
+                        type: string
+                        format: password
+                        example: secret123
+        responses:
+          '200':
+            description: Login success (trusted device)
+            content:
+              application/json:
+                schema:
+                  type: object
+                  description: Successful login; refresh token is set as an HTTP-only cookie.
                   properties:
-                    email:
+                    success:
+                      type: boolean
+                      example: true
+                    accessToken:
                       type: string
-                      format: email
-                      example: user@example.com
-                    password:
-                      type: string
-                      format: password
-                      example: secret123
-                - type: object
-                  description: Login via username
+                      description: Short-lived JWT access token
+                      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    mfaSkipped:
+                      type: boolean
+                      description: True if a valid trusted-device cookie allowed skipping OTP
+                      example: true
                   required:
-                    - username
-                    - password
+                    - success
+                    - accessToken
+          '202':
+            description: OTP required
+            content:
+              application/json:
+                schema:
+                  type: object
+                  description: Credentials valid; an OTP was sent and must be verified to finish login.
                   properties:
-                    username:
+                    success:
+                      type: boolean
+                      example: true
+                    requiresOTP:
+                      type: boolean
+                      example: true
+                    delivery:
                       type: string
-                      example: user123
-                    password:
+                      description: Channel used to deliver OTP
+                      enum:
+                        - email
+                        - sms
+                      example: email
+                    to:
                       type: string
-                      format: password
-                      example: secret123
-      responses:
-        '200':
-          description: Successful login
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  accessToken:
-                    type: string
-                    example: eyJo...
-                  refreshToken:
-                    type: string
-                    example: ooiu...
-                  authId:
-                    type: string
-                    example: ou9qw0r8qhf...
-        '401':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Invalid credentials
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: Server error
-      security: []
+                      description: Masked destination (email or phone)
+                      example: u***r@example.com
+                    hint:
+                      type: string
+                      example: Submit OTP to /v1/auth/otp/verify to complete login
+                  required:
+                    - success
+                    - requiresOTP
+                    - delivery
+                    - to
+          '401':
+            description: Invalid credentials
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Invalid credentials
+          '500':
+            description: Server error
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                      example: false
+                    message:
+                      type: string
+                      example: Server error
   /v1/auth/logout:
     post:
       summary: User logout
@@ -804,6 +842,209 @@ paths:
                   - success
                   - message
       security: []
+  /v1/auth/devices:
+    get:
+      tags:
+        - Devices
+      summary: List trusted devices
+      description: |
+        Returns trusted devices bound to the authenticated user. Requires BearerAuth. Use query flags to include revoked/expired entries.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: includeRevoked
+          schema:
+            type: boolean
+            default: false
+          description: Include devices that were revoked
+        - in: query
+          name: includeExpired
+          schema:
+            type: boolean
+            default: false
+          description: Include devices that have expired
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: List of trusted devices
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Paginated list of trusted devices
+                properties:
+                  count:
+                    type: integer
+                    example: 2
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      description: A trusted device that can skip OTP at login
+                      properties:
+                        id:
+                          type: string
+                          description: TrustedDevice document id
+                          example: 66f1c1b0f0a2f9c1a3a1b2c3
+                        deviceId:
+                          type: string
+                          description: Stable device identifier (from cookie)
+                          example: dvc_8f3f1b8f2a0c4d5e
+                        label:
+                          type: string
+                          description: Friendly name supplied by the user
+                          example: Grace’s MacBook
+                        lastUsedAt:
+                          type: string
+                          format: date-time
+                        createdAt:
+                          type: string
+                          format: date-time
+                        expiresAt:
+                          type: string
+                          format: date-time
+                        revokedAt:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        ipAtIssue:
+                          type: string
+                          example: 203.0.113.42
+                        currentDevice:
+                          type: boolean
+                          description: True if this entry matches the current request context
+                          example: false
+                      required:
+                        - id
+                        - deviceId
+                        - createdAt
+                required:
+                  - count
+                  - data
+        '401':
+          description: Standard error response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid or expired refresh token
+    delete:
+      tags:
+        - Devices
+      summary: Revoke all trusted devices
+      description: |
+        Revokes all trusted devices for the authenticated user. Requires BearerAuth. Does not log the user out; it only removes “trust this device” entries.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: All devices revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Result of a revoke operation
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  revoked:
+                    type: integer
+                    description: Number of device entries revoked
+                    example: 1
+                  message:
+                    type: string
+                    example: Device revoked
+                required:
+                  - success
+        '401':
+          description: Standard error response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid or expired refresh token
+  '/v1/auth/devices/{id}':
+    delete:
+      tags:
+        - Devices
+      summary: Revoke a specific trusted device
+      description: |
+        Revokes a single trusted device by its id. Requires BearerAuth.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: TrustedDevice document id
+          schema:
+            type: string
+            example: 66f1c1b0f0a2f9c1a3a1b2c3
+      responses:
+        '200':
+          description: Device revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Result of a revoke operation
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  revoked:
+                    type: integer
+                    description: Number of device entries revoked
+                    example: 1
+                  message:
+                    type: string
+                    example: Device revoked
+                required:
+                  - success
+        '401':
+          description: Standard error response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid or expired refresh token
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                description: Standard error response
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: Invalid or expired refresh token
   /v1/auth/google:
     get:
       tags:

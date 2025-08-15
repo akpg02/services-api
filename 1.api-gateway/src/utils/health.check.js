@@ -1,32 +1,31 @@
-// utils/health.check.js
-const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const { logger } = require('@gaeservices/common');
+const { ping } = require('./ping.service'); // <-- use the shared pinger
 
 const LOG_DIR = path.join(__dirname, '..', 'logs');
 const REPORT_PATH = path.join(__dirname, '..', 'startup-health-report.json');
 const PROMETHEUS_EXPORT = path.join(__dirname, '..', 'startup-health.prom');
 
 function ensureLogDir() {
-  if (!fs.existsSync(LOG_DIR)) {
-    fs.mkdirSync(LOG_DIR, { recursive: true });
-  }
+  if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
 }
-
 const getDateString = () => new Date().toISOString().split('T')[0];
 
+/**
+ * services can be a map of:
+ *   { serviceName: "http://host:port" }
+ * or (optionally) objects:
+ *   { serviceName: { baseUrl: "http://host:port", path: "/custom-health" } }
+ */
 async function checkServiceHealth(services) {
-  // 1) Skip in production
   if (process.env.NODE_ENV === 'production') {
     console.log(
       chalk.yellow('🔒 Skipping service health checks in production.')
     );
     return;
   }
-
-  // 2) Validate argument
   if (!services || typeof services !== 'object') {
     const msg = `checkServiceHealth: expected an object of services, got ${services}`;
     logger.error(msg);
@@ -37,57 +36,81 @@ async function checkServiceHealth(services) {
   ensureLogDir();
 
   const results = [];
-  const prometheusMetrics = [];
+  const metrics = [];
 
-  for (const [name, rawBaseUrl] of Object.entries(services)) {
-    // 3) Guard non-string URLs
-    if (typeof rawBaseUrl !== 'string') {
-      logger.warn(`Skipping "${name}" – invalid baseUrl:`, rawBaseUrl);
+  for (const [name, svc] of Object.entries(services)) {
+    let baseUrl,
+      pathSuffix = '/health';
+    if (typeof svc === 'string') {
+      baseUrl = svc;
+    } else if (
+      svc &&
+      typeof svc === 'object' &&
+      typeof svc.baseUrl === 'string'
+    ) {
+      baseUrl = svc.baseUrl;
+      if (typeof svc.path === 'string' && svc.path.trim())
+        pathSuffix = svc.path;
+    } else {
+      logger.warn(`Skipping "${name}" – invalid service config:`, svc);
       continue;
     }
 
-    const cleanBase = rawBaseUrl.replace(/\/+$/, '');
-    const url = `${cleanBase}/health`;
-    const result = { name, baseUrl: rawBaseUrl, url };
+    const r = await ping(baseUrl, { path: pathSuffix });
 
-    try {
-      const res = await axios.get(url, { timeout: 1000 });
-      result.status = 'UP';
-      result.httpStatus = res.status;
-      prometheusMetrics.push(`service_health{service="${name}"} 1`);
+    const resEntry = {
+      name,
+      baseUrl,
+      url: r.url,
+      status: r.statusText,
+      httpStatus: r.httpStatus,
+      durationMs: r.durationMs,
+    };
+    if (r.error) resEntry.error = r.error;
+
+    if (r.statusText === 'UP') {
       console.log(
-        chalk.green(`✅ ${name} is UP → ${rawBaseUrl} (HTTP ${res.status})`)
+        chalk.green(
+          `✅ ${name} is UP → ${baseUrl} (${r.httpStatus}, ${r.durationMs}ms)`
+        )
       );
-    } catch (err) {
-      result.status = 'DOWN';
-      result.error = err.message;
-      prometheusMetrics.push(`service_health{service="${name}"} 0`);
+      metrics.push(`service_health{service="${name}"} 1`);
+    } else if (r.statusText === 'DEGRADED') {
       console.log(
-        chalk.red(`❌ ${name} is DOWN → ${rawBaseUrl} | Error: ${err.message}`)
+        chalk.keyword('orange')(
+          `⚠️  ${name} degraded → ${baseUrl} (${r.httpStatus}, ${r.durationMs}ms)`
+        )
       );
+      metrics.push(`service_health{service="${name}"} 0`);
+    } else {
+      console.log(
+        chalk.red(`❌ ${name} is DOWN → ${baseUrl} | Error: ${r.error}`)
+      );
+      metrics.push(`service_health{service="${name}"} 0`);
     }
 
-    results.push(result);
+    results.push(resEntry);
   }
 
-  // 4) Write JSON report
+  // JSON report
   fs.writeFileSync(REPORT_PATH, JSON.stringify(results, null, 2));
   console.log(chalk.cyan(`\n📊 JSON report saved to: ${REPORT_PATH}`));
 
-  // 5) Write daily text log
+  // Daily text log
   const dailyLogPath = path.join(LOG_DIR, `${getDateString()}-health.log`);
   const textLog = results
     .map(
       (r) =>
-        `${r.name}: ${r.status} ${r.httpStatus || ''} → ${r.baseUrl}` +
-        (r.error ? ` | Error: ${r.error}` : '')
+        `${r.name}: ${r.status} ${r.httpStatus || ''} ${
+          r.durationMs ? r.durationMs + 'ms' : ''
+        } → ${r.baseUrl}` + (r.error ? ` | Error: ${r.error}` : '')
     )
     .join('\n');
   fs.writeFileSync(dailyLogPath, textLog);
   console.log(chalk.gray(`📁 Log written to: ${dailyLogPath}`));
 
-  // 6) Write Prometheus export
-  fs.writeFileSync(PROMETHEUS_EXPORT, prometheusMetrics.join('\n'));
+  // Prometheus export
+  fs.writeFileSync(PROMETHEUS_EXPORT, metrics.join('\n'));
   console.log(chalk.magenta(`📤 Prometheus export: ${PROMETHEUS_EXPORT}\n`));
 }
 

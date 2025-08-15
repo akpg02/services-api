@@ -1,68 +1,67 @@
-components:
-  schemas:
-    TrustedDevice:
-      type: object
-      description: A trusted device that can skip OTP at login
-      properties:
-        id:
-          type: string
-          description: TrustedDevice document id
-          example: 66f1c1b0f0a2f9c1a3a1b2c3
-        deviceId:
-          type: string
-          description: Stable device identifier (from cookie)
-          example: dvc_8f3f1b8f2a0c4d5e
-        label:
-          type: string
-          description: Friendly name supplied by the user
-          example: Grace’s MacBook
-        lastUsedAt:
-          type: string
-          format: date-time
-        createdAt:
-          type: string
-          format: date-time
-        expiresAt:
-          type: string
-          format: date-time
-        revokedAt:
-          type: string
-          format: date-time
-          nullable: true
-        ipAtIssue:
-          type: string
-          example: 203.0.113.42
-        currentDevice:
-          type: boolean
-          description: True if this entry matches the current request context
-          example: false
-      required: [id, deviceId, createdAt]
+# devices.schema.yaml  (fragment, not a full OpenAPI doc)
+TrustedDevice:
+  type: object
+  description: A trusted device that can skip OTP at login
+  properties:
+    id:
+      type: string
+      description: TrustedDevice document id
+      example: 66f1c1b0f0a2f9c1a3a1b2c3
+    deviceId:
+      type: string
+      description: Stable device identifier (from cookie)
+      example: dvc_8f3f1b8f2a0c4d5e
+    label:
+      type: string
+      description: Friendly name supplied by the user
+      example: Grace’s MacBook
+    lastUsedAt:
+      type: string
+      format: date-time
+    createdAt:
+      type: string
+      format: date-time
+    expiresAt:
+      type: string
+      format: date-time
+    revokedAt:
+      type: string
+      format: date-time
+      nullable: true
+    ipAtIssue:
+      type: string
+      example: 203.0.113.42
+    currentDevice:
+      type: boolean
+      description: True if this entry matches the current request context
+      example: false
+  required: [id, deviceId, createdAt]
 
-    TrustedDeviceList:
-      type: object
-      description: Paginated list of trusted devices
-      properties:
-        count:
-          type: integer
-          example: 2
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/TrustedDevice'
-      required: [count, data]
+TrustedDeviceList:
+  type: object
+  description: Paginated list of trusted devices
+  properties:
+    count:
+      type: integer
+      example: 2
+    data:
+      type: array
+      items:
+        $ref: '#/TrustedDevice'
+  required: [count, data]
 
-    RevokeDevicesResponse:
-      type: object
-      description: Result of a revoke operation
-      properties:
-        success:
-          type: boolean
-          example: true
-        revoked:
-          type: integer
-          description: Number of device entries revoked
-          example: 1
-        message:
-          type: string
-          example: Device revoked
-      required: [success]
+RevokeDevicesResponse:
+  type: object
+  description: Result of a revoke operation
+  properties:
+    success:
+      type: boolean
+      example: true
+    revoked:
+      type: integer
+      description: Number of device entries revoked
+      example: 1
+    message:
+      type: string
+      example: Device revoked
+  required: [success]
