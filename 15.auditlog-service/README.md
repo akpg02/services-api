@@ -29,13 +29,13 @@ The primary responsibility of this microservice is log certain api activities.
 
 ### Accessing Documentation
 
-##### OpenAPI documentation rendered in ReDoc
+- ##### OpenAPI documentation rendered in ReDoc
 
-`http://localhost:8001/docs/redoc`
+  `http://localhost:8001/docs/redoc`
 
-##### Documentation rendered in Swagger UI
+- ##### Documentation rendered in Swagger UI
 
-`http://localhost:8001/docs/swagger`
+  `http://localhost:8001/docs/swagger`
 
 ### Example docs that can be stored
 
