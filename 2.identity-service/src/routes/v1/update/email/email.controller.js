@@ -8,7 +8,7 @@ const { changeEmailSchema } = require('../../../../schemes/email');
 const { logger, publishEvent } = require('@gaeservices/common');
 const {
   generateVerificationCode,
-} = require('../../../../utils/generate-token');
+} = require('../../../../utils/generate-token.utils');
 const {
   invalidateIdentityCache,
 } = require('../../../../services/redis.service');

@@ -1,5 +1,5 @@
 const { logger } = require('@gaeservices/common');
-const { generateTokens } = require('../../../utils/generate-token');
+const { generateTokens } = require('../../../utils/generate-token.utils');
 const { upsertOAuthUser } = require('../../../models/auth.model');
 const {
   verifyGoogleIdToken,

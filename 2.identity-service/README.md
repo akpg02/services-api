@@ -6,7 +6,7 @@ The primary responsibility of this microservice is managing user authentication 
 
 1. Ensure you have Node.js installed.
 2. Create necessary .env files for each microservice. Note: a template of required environment variables will be made available.
-3. 3. In terminal, execute the following commands:
+3. In terminal, execute the following commands:
    - `npm install`
 
 ## Running the Project

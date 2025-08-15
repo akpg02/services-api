@@ -1,5 +1,5 @@
-service_health{service="Gateway"} 0
-service_health{service="Identity"} 0
+service_health{service="Gateway"} 1
+service_health{service="Identity"} 1
 service_health{service="Product"} 0
 service_health{service="Media"} 0
 service_health{service="Inventory"} 0
@@ -11,4 +11,4 @@ service_health{service="Shipment"} 0
 service_health{service="Notifications"} 0
 service_health{service="Analytics"} 0
 service_health{service="Promotions"} 0
-service_health{service="Audit Log"} 0
+service_health{service="Audit Log"} 1

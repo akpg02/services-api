@@ -11,6 +11,7 @@ const { refreshTokenRouter } = require('../v1/token/refresh.router');
 const { otpSendRouter } = require('../v1/otp/send/send.router');
 const { otpVerifyRouter } = require('../v1/otp/verify/verify.router');
 const { oauthCallback } = require('../../services/oauth.service');
+const { deviceRouter } = require('./devices/devices.router');
 
 const router = express.Router();
 
@@ -20,6 +21,9 @@ router.use('/register', registerRouter);
 router.use('/verify-email', verifyEmailRouter);
 router.use('/forgot-password', forgotRouter);
 router.use('/reset-password/:token', resetRouter);
+
+// Handle trusted devices
+router.use('/devices', deviceRouter);
 
 // Token handling
 router.use('/logout', logoutRouter);

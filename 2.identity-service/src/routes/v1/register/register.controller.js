@@ -12,7 +12,7 @@ const {
 const {
   generateTokens,
   generateVerificationCode,
-} = require('../../../utils/generate-token');
+} = require('../../../utils/generate-token.utils');
 
 const emailQueue = new Queue('emailQueue');
 

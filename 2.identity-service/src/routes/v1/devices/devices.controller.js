@@ -1,30 +1,41 @@
-const trustedDeviceDB = require('../../../models/trusted-device.mongo');
+const { ApiFeatures, logger } = require('@gaeservices/common');
+const {
+  fetchAllDevices,
+  revokeTrustedDevice,
+  revokeAllTrustedDevices,
+} = require('../../../models/trusted-device.model');
 
 exports.listDevices = async (req, res) => {
   const userId = req.user.id;
-  const devices = await trustedDeviceDB
-    .find({ user: userId })
-    .select(
-      'deviceId label lastUsedAt createdAt expiresAt revokedAt ipAtIssue'
-    );
-  res.json({ success: true, devices });
+  const features = new ApiFeatures(fetchAllDevices(userId), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  let devices = await features.query;
+  res.json({ count: devices.length, data: devices });
 };
 
 exports.revokeDevice = async (req, res) => {
   const userId = req.user.id;
   const { deviceId } = req.params;
-  await trustedDeviceDB.findOneAndUpdate(
-    { user: userId, deviceId },
-    { revokedAt: new Date() }
-  );
-  res.json({ success: true });
+  try {
+    await revokeTrustedDevice(userId, deviceId);
+  } catch (err) {
+    logger.error('Error while revoking a device', err);
+    return res.status(400).json({ success: false, error: err });
+  }
+  return res.status(204).json({ success: true });
 };
 
 exports.revokeAll = async (req, res) => {
   const userId = req.user.id;
-  await trustedDeviceDB.updateMany(
-    { user: userId, revokedAt: null },
-    { $set: { revokedAt: new Date() } }
-  );
-  res.json({ success: true });
+  try {
+    await revokeAllTrustedDevices(userId);
+  } catch (error) {
+    logger.error('Error while revoking all device', err);
+    return res.status(400).json({ success: false, error: err });
+  }
+  res.status(204).json({ success: true });
 };

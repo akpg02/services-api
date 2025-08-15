@@ -1,3 +1,7 @@
+// const SECURE = String(process.env.HTTPS_ENABLE).toLowerCase() === 'true';
+// const scheme = SECURE ? 'https' : 'http';
+// const url = (host, port) => `${scheme}://${host}:$`;
+
 const services = {
   Gateway: process.env.API_GATEWAY,
   Identity: process.env.IDENTITY_SERVICE_URL,

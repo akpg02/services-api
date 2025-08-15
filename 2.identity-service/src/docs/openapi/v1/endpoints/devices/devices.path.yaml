@@ -28,7 +28,7 @@ DevicesRoot:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TrustedDeviceList'
+              $ref: './devices.schema.yaml#/TrustedDeviceList'
       '401':
         $ref: '../../components/responses/error.yaml#/ErrorResponse'
 
@@ -46,7 +46,7 @@ DevicesRoot:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RevokeDevicesResponse'
+              $ref: './devices.schema.yaml#/RevokeDevicesResponse'
       '401':
         $ref: '../../components/responses/error.yaml#/ErrorResponse'
 
@@ -72,7 +72,7 @@ DevicesById:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RevokeDevicesResponse'
+              $ref: './devices.schema.yaml#/RevokeDevicesResponse'
       '404':
         description: Device not found
         content:

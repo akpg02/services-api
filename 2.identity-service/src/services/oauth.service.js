@@ -1,10 +1,10 @@
 const https = require('https');
 const fetch = require('node-fetch');
 const { OAuth2Client } = require('google-auth-library');
-const { generateTokens } = require('../utils/generate-token');
+const { generateTokens } = require('../utils/generate-token.utils');
 const { logger } = require('@gaeservices/common');
 
-exports.oauthCallback = async (req, res) => {
+async function oauthCallback(req, res) {
   try {
     // req.user was set by passport strategy's done(null, user)
     const user = req.user;
@@ -19,7 +19,7 @@ exports.oauthCallback = async (req, res) => {
     logger.error('OAuth callback error', err);
     return res.redirect(302, process.env.OAUTH_FAILURE_REDIRECT);
   }
-};
+}
 
 // TODO: update your-app
 // --- Strict TLS & sane timeouts

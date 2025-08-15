@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const deleteInactiveUsers = require('./scripts/delete-inactive-users');
 const { connectToDB } = require('./database/db');
 const { logger } = require('@gaeservices/common');
@@ -13,8 +12,6 @@ process.on('uncaughtException', (reason, promise) => {
 
 const PORT = process.env.PORT || 8001;
 
-let server = null;
-
 async function startServer() {
   try {
     // connect to DB
@@ -24,8 +21,7 @@ async function startServer() {
     deleteInactiveUsers();
 
     // Start http servcer
-    server = http.createServer(app);
-    server.listen(PORT, () => {
+    http.createServer(app).listen(PORT, () => {
       logger.info(`Identity service running on port ${PORT}`);
     });
   } catch (err) {

@@ -9,7 +9,7 @@ const {
 } = require('../../../models/auth.model');
 const jwt = require('jsonwebtoken');
 const { logger } = require('@gaeservices/common');
-const { generateTokens } = require('../../../utils/generate-token');
+const { generateTokens } = require('../../../utils/generate-token.utils');
 
 exports.refreshToken = async (req, res) => {
   logger.info('Refresh token endpoint');

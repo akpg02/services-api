@@ -3,7 +3,7 @@ LoginSuccess:
   content:
     application/json:
       schema:
-        $ref: './login.schema.yaml#/LoginResponse'
+        $ref: './login.schema.yaml#/LoginSuccessResponse'
 
 Unauthorized:
   description: Invalid credentials
